@@ -1,25 +1,49 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import Routers from "./Routers";
+import BottomNav from "components/BottomNav";
 
+const staticNavList = [
+  {
+    svg: "",
+    content: "驾驶舱",
+    id: "cockpit",
+    url: "/cockpit"
+  },
+  {
+    svg: "",
+    content: "专题",
+    id: "spec",
+    url: "/spec"
+  },
+  {
+    svg: "",
+    content: "统计",
+    id: "statistics",
+    url: "/statistics"
+  },
+  {
+    svg: "",
+    content: "护理",
+    id: "nursing",
+    url: "/nursing"
+  },
+  {
+    svg: "",
+    content: "我的",
+    id: "mine",
+    url: "/mine"
+  },
+];
 class App extends Component {
   render() {
+    const { location } = this.props;
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <Routers />
+        <BottomNav
+          navList={staticNavList}
+          activeId={location.pathname.replace(/^\//, "")}
+        />
       </div>
     );
   }
