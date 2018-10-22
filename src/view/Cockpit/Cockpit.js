@@ -1,69 +1,61 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { ArcDate, Tab } from "components";
+import { ArcDate, Tab, BlockArea, List as ListBase } from "components";
+import { NavItem } from "./components";
+import styled from "styled-components";
+import { ReactComponent as outpatient_and_emerg } from "static/svg/outpatient_and_emerg.svg";
+import { ReactComponent as operation } from "static/svg/operation.svg";
+import { ReactComponent as physical_examination } from "static/svg/physical_examination.svg";
+import { ReactComponent as admission_number } from "static/svg/admission_number.svg";
+import { ReactComponent as in_the_hospital } from "static/svg/in_the_hospital.svg";
+import { ReactComponent as discharge_number } from "static/svg/discharge_number.svg";
+
+const CalendarView = styled.div`
+  position: absolute;
+  top: 67px;
+  left: 50%;
+  transform: translate(-50%);
+  color: #fff;
+  z-index: 4;
+  display: inline-block;
+  font-size: 14px;
+`;
+const DateInput = styled.input`
+  position: absolute;
+  top: 67px;
+  left: 50%;
+  transform: translate(-50%);
+  color: #fff;
+  z-index: 4;
+  display: inline-block;
+  font-size: 14px;
+`;
+
+const NavList = styled(ListBase)`
+  & > li {
+    display: flex;
+    justify-content: space-around;
+  }
+`;
+const Svg = Component => <Component />;
 
 const propTypes = {};
 const oneDay = 24 * 3600 * 1000;
+const endDay = new Date() - oneDay;
 
-const getDateList = (endDay, length, type) => {
-  if (type === "month") {
-    const endM = new Date(endDay).getMonth() + 1;
-    const endY = new Date(endDay).getYear();
-
-    return Array(length)
-      .fill("")
-      .map((ele, index) => {
-        let y = endY + 1900;
-        let m = endM - index;
-        y += Math.floor(m / 12);
-        if (m <= 0) {
-          m = 12 + Math.floor(m % 12);
-        } else {
-          m = 0 + Math.floor(m % 12);
-        }
-        return new Date(`${y}/${m}/1`).valueOf();
-      })
-      .reverse();
+class Calendar extends React.PureComponent {
+  render() {
+    const { label, date } = this.props;
+    return <CalendarView>{label}</CalendarView>;
   }
-  if (type === "year") {
-    return () => {};
-  }
-  return Array(length)
-    .fill("")
-    .map((ele, index) => {
-      return endDay - oneDay * index;
-    })
-    .reverse();
-};
+}
 class Cockpit extends Component {
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
-      currentDate: this.getDefaultCurrentDate(props.match.params.type),
-      arcDateComputedSetting: {}
+      currentValue: 0
     };
   }
-
-  getDefaultCurrentDate = type => {
-    const today = new Date().toLocaleDateString();
-
-    switch (type) {
-      case "month":
-        let [year, month, day] = today.match(/\d+/g);
-        month = day >= 2 ? month - 1 : month - 2;
-        if (month < 0) {
-          month = 12 - month;
-          year -= 1;
-        }
-        console.log(`${year}/${month}/${1}`, "===");
-        return new Date(`${year}/${month}/${1}`).valueOf();
-      case "year":
-        return new Date(today).valueOf() - oneDay;
-      default:
-        return new Date(today).valueOf() - oneDay;
-    }
-  };
-
   componentWillReceiveProps(nextProps) {
     const {
       match: {
@@ -77,93 +69,120 @@ class Cockpit extends Component {
     } = nextProps;
     if (nextType !== type) {
       this.setState({
-        currentDate: this.getDefaultCurrentDate(nextType),
-        arcDateComputedSetting: this.getComputedSetting(nextType)
+        currentValue: 0
       });
     }
   }
 
-  onDateChange = date => {
-    console.log(new Date(date).toLocaleString());
+  onDateChange = value => {
     this.setState({
-      currentDate: date
+      currentValue: value
     });
   };
 
-  getDateList = (endDay, length, type) => {
-    if (type === "month") {
-      const endM = new Date(endDay).getMonth() + 1;
-      const endY = new Date(endDay).getYear();
-      return Array(length)
-        .fill("")
-        .map((ele, index) => {
-          let y = endY + 1900;
-          let m = endM - index;
-          y += Math.floor(m / 12);
-          if (m <= 0) {
-            m = 12 + Math.floor(m % 12);
-          } else {
-            m = 0 + Math.floor(m % 12);
-          }
-          return new Date(`${y}/${m}/1`);
-        })
-        .reverse();
-    }
-    if (type === "year") {
-      return () => {};
+  getDateList = (finalIndex, length, type, passedCount = 0) => {
+    let [year, month, day] = new Date(endDay)
+      .toLocaleDateString()
+      .match(/\d+/g);
+
+    year = year - 1;
+    month = month - 1;
+    if (day < 2) {
+      month = month - 1;
+      if (month === -1) {
+        year = year - 1;
+      }
     }
     return Array(length)
       .fill("")
       .map((ele, index) => {
-        return endDay - oneDay * index;
-      })
-      .reverse();
+        const value = index - finalIndex + passedCount;
+        switch (type) {
+          case "month":
+            return {
+              value: value,
+              label: 12 + ((month + value - 12) % 12)
+            };
+          case "year":
+            return {
+              value: value,
+              label: year + value
+            };
+          default:
+            return {
+              value: value,
+              label: new Date(endDay + value * oneDay).getDate()
+            };
+        }
+      });
   };
-  getComputedSetting = type => {
-    const endDateStr = new Date().toLocaleDateString();
-    let finalDate;
-    let [year, month, day] = endDateStr.match(/\d+/g);
+
+  getDateText = (currentValue, type) => {
+    let [year, month, day] = new Date(endDay)
+      .toLocaleDateString()
+      .match(/\d+/g);
+
     switch (type) {
       case "month":
-        month = (day >= 2 ? month - 1 : month - 2) + 11;
-        if (month > 12) {
-          month = month - 12;
-          year = +year + 1;
+        month = month - 1;
+        if (day < 2) {
+          month = month - 1;
         }
-        finalDate = new Date(`${year}/${month}/${1}`).valueOf();
-        return {
-          finalDate: finalDate,
-          lastDate: finalDate // 当前最后日期
-        };
+        const m = +month + currentValue;
+        return `${+year + parseInt(m / 12)}年${12 + ((m - 12) % 12)}月`;
       case "year":
-        finalDate = new Date(`${year + 10}/1/1`).valueOf();
-        return {
-          finalDate: finalDate,
-          lastDate: finalDate // 当前最后日期
-        };
+        year = year - 1;
+        if (day < 2 && month === 1) {
+          year = year - 1;
+        }
+        return `${year}年`;
       default:
-        finalDate = new Date(endDateStr).valueOf() + 10 * oneDay;
-        return {
-          finalDate: finalDate,
-          lastDate: finalDate
-        };
+        return new Date(endDay + currentValue * oneDay)
+          .toLocaleDateString()
+          .replace(/(\d+).(\d+).(\d+)/, "$1年$2月$3日");
     }
   };
+
+  reduceNavItem = list => {
+    return list.reduce((total, ele, index) => {
+      if (index % 2) {
+        total[total.length - 1] = {
+          content: [...total[total.length - 1].content, <NavItem {...ele} />]
+        };
+        return total;
+      }
+      return [
+        ...total,
+        {
+          content: [<NavItem {...ele} />]
+        }
+      ];
+    }, []);
+  };
   render() {
+    const {
+      props,
+      state,
+      onDateChange,
+      getDateText,
+      getDateList,
+      reduceNavItem
+    } = this;
+    const { currentValue } = state;
     const {
       match: {
         params: { type }
       }
-    } = this.props;
+    } = props;
     console.log(type);
     return (
       <div>
         <ArcDate
-          onChange={this.onDateChange}
-          selectedDate={this.state.currentDate}
+          onChange={onDateChange}
+          selectedValue={currentValue}
           computedSetting={{
-            getDateList: getDateList,
-            ...this.getComputedSetting(type)
+            getDataList: getDateList,
+            page: 0
           }}
           type={type}
         >
@@ -175,7 +194,55 @@ class Cockpit extends Component {
               { content: "年报", id: "year", to: "/cockpit/year" }
             ]}
           />
+          {/* <DateInput type="date" /> */}
+          <Calendar label={getDateText(currentValue, type)} />
         </ArcDate>
+
+        <BlockArea title={"重点业务分析"}>
+          <NavList
+            list={reduceNavItem([
+              {
+                svg: outpatient_and_emerg,
+                title: "门急诊人次",
+                count: 1098,
+                to: ""
+              },
+              {
+                svg: operation,
+                title: "手术台数",
+                count: 34,
+                to: ""
+              },
+              {
+                svg: physical_examination,
+                title: "体检人数",
+                count: 34,
+                to: ""
+              },
+              {
+                svg: admission_number,
+                title: "入院人数",
+                count: 34,
+                to: ""
+              },
+              {
+                svg: in_the_hospital,
+                title: "在院人数",
+                count: 34,
+                to: ""
+              },
+              {
+                svg: discharge_number,
+                title: "出院人数",
+                count: 34,
+                to: ""
+              }
+            ])}
+          />
+        </BlockArea>
+        <BlockArea title={"收入分析"}>
+          <ListBase list={[]} />
+        </BlockArea>
       </div>
     );
   }

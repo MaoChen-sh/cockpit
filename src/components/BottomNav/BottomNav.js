@@ -11,31 +11,42 @@ const Wrap = styled.section`
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 6px 20px;
+  padding: 6px 0px;
   background: #fff;
   box-shadow: 0 0 3px 0 #d5d5d5;
 `;
 const NavItem = styled(Link)`
   display: block;
   color: ${p => (p.active ? "#0d86e8" : "#666")};
-  span {
+  text-align: center;
+  & > span {
     font-size: 10px;
+    display: block;
+  }
+  & > svg {
+    width: 20px;
+    height: 20px;
   }
 `;
 class BottomNav extends PureComponent {
   render() {
-    const { navList, activeId } = this.props;
+    const { className, navList, activeId } = this.props;
     return (
-      <Wrap>
-        {navList.map(ele => (
-          <NavItem
-            key={ele.id}
-            active={Number(activeId === ele.id)} // `Number()` to fix react 16, non-boolean attrs warning!
-            to={ele.url}
-          >
-            <span>{ele.content}</span>
-          </NavItem>
-        ))}
+      <Wrap className={className}>
+        {navList.map(ele => {
+          const { id, url, content, svg: Svg } = ele;
+          const active = Number(activeId === id);
+          return (
+            <NavItem
+              key={id}
+              active={active} // `Number()` to fix react 16, non-boolean attrs warning!
+              to={url}
+            >
+              {Svg && <Svg className={active ? "bottom-nav-svg__active" : ""} />}
+              <span>{content}</span>
+            </NavItem>
+          );
+        })}
       </Wrap>
     );
   }

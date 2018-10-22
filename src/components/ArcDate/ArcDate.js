@@ -16,7 +16,7 @@ const BackGround = styled.canvas`
   top: 0;
   z-index: 1;
 `;
-const DateCircle = styled.canvas`
+const DataCircle = styled.canvas`
   width: 100vw;
   height: 160px;
   position: absolute;
@@ -41,36 +41,18 @@ const ShadowBox = styled.div`
  */
 
 const dpr = window.devicePixelRatio || 1;
-const oneDay = 24 * 3600 * 1000;
-const defaultGetDataList = (endDay, length) => {
+const defaultGetDataList = (finalIndex, length) => {
+  const oneDay = 24 * 3600 * 1000;
+  const endDay = new Date(new Date().toLocaleDateString()).valueOf();
   return Array(length)
     .fill("")
     .map((ele, index) => {
-      return endDay - oneDay * index;
-    })
-    .reverse();
-};
-/**
- *  计算时间
- * @param {number} date 初始日期
- * @param {number} addCount 增量
- * @param {string} type 类型
- */
-const computeDate = (date, addCount, type) => {
-  console.log(addCount, "add");
-  let [year, month] = new Date(date).toLocaleDateString().match(/\d+/g);
-  switch (type) {
-    case "month":
-      month = +month + addCount;
-      year = +year + Math.floor(month / 12);
-      month = month > 0 ? month % 12 : 12 + (month % 12);
-      console.log(`${year}/${month}/1`);
-      return new Date(`${year}/${month}/1`).valueOf();
-    case "year":
-      return new Date(`${+year + addCount}/1/1`).valueOf();
-    default:
-      return date + addCount * oneDay;
-  }
+      const value = endDay + oneDay * (index - finalIndex);
+      return {
+        value: value,
+        label: new Date(value).getDay()
+      };
+    });
 };
 /**
  *  Component
@@ -78,39 +60,41 @@ const computeDate = (date, addCount, type) => {
 class ArcDate extends PureComponent {
   constructor(props) {
     super();
-    const { staticSetting, computedSetting, type, selectedDate } = props;
-    console.log("object", selectedDate);
-    this.staticSetting = {
-      canvasW: window.innerWidth, // canvas 宽度
-      canvasH: 150, // canvas 高度
-      count: 30, // 半圆内分布量
-      q: Math.PI / 1440, // 弧度和水平长度的比。优化动画，简化计算，直接通过固定比例设置，取消三角函数的不精确计算，防止过经过Π/2时的抖动
-      endDate: new Date(new Date().toLocaleDateString()).valueOf(), // 最后日期
-      viewCount: 7, // 可视项
-      ...staticSetting
-    };
-    const { canvasW, canvasH, count, endDate, viewCount } = this.staticSetting;
+    const { staticSetting, computedSetting, type, selectedValue } = props;
+    const canvasW = window.innerWidth;
+    const canvasH = 150;
+    const count = 30;
+    const viewCount = 7;
     const r = Math.round(canvasW / 2 / Math.sin((Math.PI * 3.5) / count)); // 半径
-    const finalDate = computedSetting.finalDate || endDate + 10 * oneDay;
-    const getDateList =
-      (computedSetting && computedSetting.getDateList) || defaultGetDataList;
-    const dateList = getDateList(finalDate, count, type);
+    const finalVisibleIndex = 18;
 
-    this.computedSetting = {
+    this.staticSetting = {
+      canvasW: canvasW, // canvas 宽度
+      canvasH: canvasH, // canvas 高度
       r: r,
       center: {
         // 圆心坐标
         x: canvasW / 2,
         y: canvasH - r
       },
-      viewDeg: (Math.PI * viewCount) / count, // 可视角度
+      count: count, // 半圆内分布量
       deg: Math.PI / count, // 分布角度
+      viewCount: viewCount, // 可视项
+      viewDeg: (Math.PI * viewCount) / count, // 可视角度
+      q: Math.PI / 1440, // 弧度和水平长度的比。优化动画，简化计算，直接通过固定比例设置，取消三角函数的不精确计算，防止过经过Π/2时的抖动
+      finalVisibleIndex: finalVisibleIndex, // 最终可视项
+      ...staticSetting
+    };
 
-      finalDate: finalDate, // 整体最后日期
-      lastDate: finalDate, // 当前最后日期
-      dateList: dateList, //日期列表
-      getDateList: getDateList, //日期列表
-      selectedDate: selectedDate || dateList[18], //选中的日期
+    const getDataList =
+      (computedSetting && computedSetting.getDataList) || defaultGetDataList;
+    const dataList = getDataList(finalVisibleIndex, count, type);
+
+    this.computedSetting = {
+      page: 0, // 当前页数
+      dataList: dataList, // 数据列表
+      getDataList: getDataList, // 数据列表获取函数
+      selectedValue: selectedValue || 0, //选中的值
       ...computedSetting
     };
     // 当前选中的项
@@ -118,7 +102,7 @@ class ArcDate extends PureComponent {
 
   componentDidMount() {
     this.draw("bg", "bgCircle");
-    this.draw("date", "dateNumber");
+    this.draw("data", "dataNumber");
     this.wrapNode.addEventListener(
       "touchmove",
       e => {
@@ -129,38 +113,42 @@ class ArcDate extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { count } = this.staticSetting;
-    const { selectedDate, type } = this.props;
+    const { finalVisibleIndex, count } = this.staticSetting;
+    const { selectedValue, type } = this.props;
     const { computedSetting: nextComputedSetting, type: nextType } = nextProps;
-    const finalDate =
-      nextComputedSetting.finalDate || this.computedSetting.finalDate;
-    if (type !== nextProps.type) {
+    if (type !== nextType) {
+      this.cachePrevRouteDeg = "";
       this.computedSetting = {
         ...this.computedSetting,
         ...nextComputedSetting,
-        dateList: nextComputedSetting.getDateList(finalDate, count, nextType)
+        dataList: nextComputedSetting.getDataList(
+          finalVisibleIndex,
+          count,
+          nextType
+        )
       };
     }
-    if (selectedDate !== nextProps.selectedDate) {
-      this.computedSetting.selectedDate =
-        nextProps.selectedDate || finalDate - 11 * oneDay;
+    if (selectedValue !== nextProps.selectedValue) {
+      this.computedSetting.selectedValue = nextProps.selectedValue || 0;
     }
   }
   componentDidUpdate(prevProps) {
     this.draw("bg", "bgCircle");
     if (this.isInertia) {
-      const { q } = this.staticSetting;
-      if (this.props.selectedDate !== prevProps.selectedDate) {
+      const { q, viewDeg } = this.staticSetting;
+      const { page } = this.computedSetting;
+      if (this.props.selectedValue !== prevProps.selectedValue) {
         this.isInertia = false;
-        let relL = this.getScrollDegFromDate(this.props.selectedDate);
+        let relL =
+          (Math.floor(-this.props.selectedValue / 7) + page) * viewDeg -
+          this.cacheDeg;
         let v0 = (relL > 0 ? 1 : -1) * q;
         let t0 = (2 * relL) / v0;
         let a = -v0 / t0;
         this.moveTo(v0, a);
       }
     } else {
-      console.log("---\n", this.computedSetting.dateList);
-      this.draw("date", "dateNumber", true);
+      this.draw("data", "dataNumber", true);
     }
   }
 
@@ -180,9 +168,7 @@ class ArcDate extends PureComponent {
    * 绘制图案
    */
   bgCircle = ctx => {
-    const { canvasW, canvasH } = this.staticSetting;
-    const { center, r } = this.computedSetting;
-
+    const { canvasW, canvasH, center, r } = this.staticSetting;
     const lineargradient = ctx.createLinearGradient(
       canvasW,
       canvasH / 2,
@@ -191,82 +177,65 @@ class ArcDate extends PureComponent {
     );
     lineargradient.addColorStop(0, "#1ab6f4");
     lineargradient.addColorStop(1, "#0b7fe6");
-
     ctx.fillStyle = lineargradient;
-
     ctx.beginPath();
     ctx.arc(center.x, center.y, r, 0, Math.PI, false);
     ctx.fill();
     ctx.closePath();
   };
 
-  dateNumber = (ctx, isClickCall) => {
-    const { viewCount, count } = this.staticSetting;
+  dataNumber = (ctx, isClickCall) => {
     const {
-      dateList,
-      lastDate,
+      viewCount,
+      count,
       viewDeg,
       center,
       r,
       deg,
-      selectedDate,
-      getDateList
-    } = this.computedSetting;
+      finalVisibleIndex
+    } = this.staticSetting;
+    const { page, dataList, selectedValue, getDataList } = this.computedSetting;
     const { type } = this.props;
     let routeDeg = this.cacheDeg + this.deltaDeg;
-    if (
-      routeDeg < 0 &&
-      this.computedSetting.lastDate === this.computedSetting.finalDate
-    ) {
-      routeDeg = 0;
-    }
     if (!isClickCall && this.cachePrevRouteDeg === routeDeg) {
       return false;
     } else {
       this.cachePrevRouteDeg = routeDeg;
     }
-    this.clear("date");
+    if (routeDeg < 0 && page === 0) {
+      routeDeg = 0;
+    }
+    this.clear("data");
     ctx.font = "14px PingFangSC-Medium";
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.beginPath();
     // 覆写当前可视数据
     if (Math.abs(routeDeg % Math.PI) >= 1 * viewDeg) {
-      let arrow = routeDeg > 0 ? 1 : -1;
-      this.cacheDeg -= arrow * viewDeg;
-      this.computedSetting.dateList = getDateList(
-        computeDate(lastDate, -arrow * viewCount, type),
+      let arrow = routeDeg > 0 ? -1 : 1;
+      this.cacheDeg += arrow * viewDeg;
+      this.computedSetting.dataList = getDataList(
+        finalVisibleIndex,
         count,
-        type
+        type,
+        viewCount * (page + arrow)
       );
-      this.computedSetting.lastDate = this.computedSetting.dateList[
-        this.computedSetting.dateList.length - 1
-      ];
+      this.computedSetting.page += arrow;
     }
+
     // 循环绘制日期
-    dateList.forEach((ele, index) => {
+    dataList.forEach((ele, index) => {
       const currentDeg = deg * index + routeDeg;
 
-      if (ele === selectedDate) {
+      if (ele.value === selectedValue) {
         this.draw(
-          "date",
+          "data",
           "selectedCircle",
           center.x - Math.cos(currentDeg) * (r - 4) - 8,
           center.y + Math.sin(currentDeg) * (r - 4)
         );
         ctx.fillStyle = "rgba(255,255,255,0.6)";
       }
-      let content;
-
-      switch (type) {
-        case "month":
-          content = new Date(ele).getMonth() + 1;
-          break;
-        case "year":
-          content = new Date(ele).getYear() + 1900;
-          break;
-        default:
-          content = new Date(ele).getDate();
-      }
+      let content = ele.label;
 
       ctx.fillText(
         content,
@@ -321,7 +290,7 @@ class ArcDate extends PureComponent {
     const { q } = this.staticSetting;
     const deltaL = e.touches[0].pageX - this.startPoint.x; // 水平滑动距离
     this.deltaDeg = deltaL * q;
-    this.draw("date", "dateNumber");
+    this.draw("data", "dataNumber");
   };
 
   touchEnd = e => {
@@ -355,54 +324,39 @@ class ArcDate extends PureComponent {
 
   // 回弹
   rebound = l => {
-    const { viewDeg } = this.computedSetting;
+    const { viewDeg } = this.staticSetting;
     const remainderDeg = Math.abs(this.cacheDeg) % viewDeg;
     if (remainderDeg === 0) {
       return;
     }
-    if (remainderDeg > viewDeg / 3) {
-      this.endAnime(l < 0 ? viewDeg - remainderDeg : remainderDeg - viewDeg);
-    } else {
-      this.endAnime(l);
-    }
+    this.endAnime(l);
   };
 
-  // 根据目标日期获取滚动距离
-  getScrollDegFromDate = date => {
-    const { viewDeg } = this.computedSetting;
-    const { viewCount } = this.staticSetting;
-    const selectedLastDate = date + oneDay * 10;
-    const delta = Math.floor(
-      (this.computedSetting.lastDate - selectedLastDate) / oneDay / viewCount
-    );
-
-    return delta * viewDeg - this.cacheDeg;
-  };
   endAnime = (l, isInertia) => {
-    const { viewCount, endDate } = this.staticSetting;
-    const { viewDeg, selectedDate } = this.computedSetting;
+    const { viewCount, viewDeg } = this.staticSetting;
+    const { page, selectedValue } = this.computedSetting;
 
     let a, v0, t0; // 加速度， 初速度， 时间
     let counterclockwise = l > 0; // 向右滑 —— 逆时针
 
     if (isInertia) {
       // 惯性
-      if (
-        !counterclockwise &&
-        selectedDate &&
-        selectedDate + viewCount * oneDay > endDate
-      ) {
+      if (!counterclockwise && page === 0 && selectedValue >= 0) {
+        // 滑动到最后禁止
         return;
       }
-      const nextDate =
-        selectedDate +
-        (counterclockwise ? -viewCount : viewCount) * oneDay -
-        parseInt(l / viewDeg) * viewCount * oneDay;
-      this.onDateChange(nextDate);
+      const nextValue =
+        selectedValue +
+        (counterclockwise ? -viewCount : viewCount) -
+        parseInt(l / viewDeg) * viewCount;
+      this.onDataChange(nextValue > 0 ? 0 : nextValue);
     } else {
       // 回弹
-      const relL = this.getScrollDegFromDate(selectedDate);
-      counterclockwise = relL > 0; // 向右滑 —— 逆时针
+      // const relL = page * viewDeg - this.cacheDeg;
+      const relL =
+        (Math.floor(-this.props.selectedValue / 7) + page) * viewDeg -
+        this.cacheDeg;
+      counterclockwise = relL < 0; // 向右滑 —— 逆时针
       t0 = 300;
       v0 = (2 * relL) / t0;
       a = -v0 / t0;
@@ -410,7 +364,7 @@ class ArcDate extends PureComponent {
     }
   };
   moveTo = (v, a) => {
-    const { viewDeg } = this.computedSetting;
+    const { viewDeg } = this.staticSetting;
     let v0 = v;
     let a0 = a;
     let t0 = new Date();
@@ -420,13 +374,12 @@ class ArcDate extends PureComponent {
         return;
       }
       this.isAnimating = true;
-      const { count } = this.staticSetting;
-      const { dateList, finalDate } = this.computedSetting;
+      const { page } = this.computedSetting;
       const repain = () => {
-        this.draw("date", "dateNumber");
+        this.draw("data", "dataNumber");
         this.isAnimating = false;
       };
-      if (v0 < 0 && dateList[count - 1] === finalDate && this.cacheDeg <= 0) {
+      if (v0 < 0 && page === 0 && this.cacheDeg <= 0) {
         this.cacheDeg = 0;
         repain();
         return;
@@ -444,7 +397,7 @@ class ArcDate extends PureComponent {
       v0 = nextV;
       this.cacheDeg += deltaL;
       repain();
-      window.requestAnimationFrame(anime);
+      let res = window.requestAnimationFrame(anime);
     };
     window.requestAnimationFrame(anime);
   };
@@ -453,29 +406,29 @@ class ArcDate extends PureComponent {
    *  日期点击
    */
   clickHandle = e => {
-    const { center, r, deg, dateList } = this.computedSetting;
+    const { center, r, deg } = this.staticSetting;
     const { clientX: x, clientY: y } = e;
     if (y > 90 && y < 150) {
       const squareR = Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2);
       if (squareR < Math.pow(r + 15, 2) && squareR > Math.pow(r - 25, 2)) {
         const currentDeg = Math.atan((x - center.x) / (y - center.y));
         const remainderDeg = currentDeg % deg;
-        const selectedIndex =
-          Math.round((currentDeg - this.cacheDeg) / deg) + 15;
+        const index = Math.round((currentDeg - this.cacheDeg) / deg) + 15;
         // 限制触发范围
         if (remainderDeg < deg / 3 || remainderDeg > (deg * 2) / 3) {
-          this.onDateChange(dateList[selectedIndex]);
+          const { dataList, page } = this.computedSetting;
+          this.onDataChange(dataList[index].value);
         }
       }
     }
   };
 
-  onDateChange = date => {
-    if (!date) {
+  onDataChange = value => {
+    if (value === false) {
       return;
     }
     const { onChange } = this.props;
-    onChange && onChange(date);
+    onChange && onChange(value);
   };
 
   render() {
@@ -495,8 +448,8 @@ class ArcDate extends PureComponent {
           width={canvasW}
           height={canvasH + 10}
         />
-        <DateCircle
-          innerRef={this.setRefCtx("date")}
+        <DataCircle
+          innerRef={this.setRefCtx("data")}
           width={canvasW}
           height={canvasH + 10}
         />
@@ -514,6 +467,6 @@ ArcDate.propTypes = {
 };
 
 export default ControllSwitchHoc({
-  value: "selectedDate",
-  defaultValue: "defaultSelectedDate"
+  value: "selectedValue",
+  defaultValue: "defaultSelectedValue"
 })(ArcDate);
