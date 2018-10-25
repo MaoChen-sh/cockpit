@@ -154,7 +154,42 @@ input[type=search]::-webkit-search-results-decoration {
   }
 }
 
+/* public style*/
+.list_title--sort {
+  display: block;
+  position: relative;
+  padding-right: 12px;
+}
 
-.App{
-  height: 2000px;
+.list_title--sort::after,
+.list_title--sort::before {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  height: 0;
+  width: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid #999;
+  border-bottom: 0px solid transparent;
+}
+
+.list_title--sort::before {
+  transform: rotate(180deg) translate(0, calc(1px + 50%))
+}
+
+.list_title--sort::after {
+  transform: translate(0, calc(1px + 50%))
+}
+
+.list_title--sort.up::before {
+  border-top-color: #0D86E8;
+}
+
+.list_title--sort.down::after {
+  border-top-color: #0D86E8;
 }

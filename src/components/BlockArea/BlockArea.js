@@ -6,13 +6,15 @@ const Box = styled.section`
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   width: 95%;
-  margin : 10px auto 0;
-  padding: 10px 5%;
+  margin: 10px auto 0;
+  padding: 14px 5%;
 `;
 const NavTitle = styled.h2`
   font-size: 14px;
-  color: #4a4a4a;
+  color: #666;
+  font-weight: bold;
   text-align: center;
+  margin-bottom: 14px;
 `;
 
 class BlockArea extends PureComponent {

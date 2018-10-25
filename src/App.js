@@ -8,6 +8,11 @@ import { ReactComponent as special } from "static/svg/special.svg";
 import { ReactComponent as statistics } from "static/svg/statistics.svg";
 import { ReactComponent as nursing } from "static/svg/nursing.svg";
 import { ReactComponent as mine } from "static/svg/mine.svg";
+const Wrap =styled.div`
+  padding-bottom: 48px;
+  min-height: 100vh;
+  background: #f5f5f5;
+`
 const Nav = styled(BottomNav)`
   svg.bottom-nav-svg__active{
     path {
@@ -60,13 +65,13 @@ class App extends Component {
     const { location } = this.props;
     console.log(location.pathname);
     return (
-      <div className="App">
+      <Wrap className="App">
         <Routers />
         <Nav
           navList={staticNavList}
-          activeId={location.pathname.match(/\w+/g)[0]}
+          activeId={location.pathname.match(/\w+/g)&&location.pathname.match(/\w+/g)[0]}
         />
-      </div>
+      </Wrap>
     );
   }
 }

@@ -3,19 +3,6 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import { ControllSwitchHoc } from "wowjoy-component/es/tools";
 
-const Wrap = styled.section`
-  position: relative;
-  width: 100vw;
-  height: 160px;
-`;
-const BackGround = styled.canvas`
-  width: 100vw;
-  height: 160px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1;
-`;
 const DataCircle = styled.canvas`
   width: 100vw;
   height: 160px;
@@ -23,18 +10,6 @@ const DataCircle = styled.canvas`
   left: 0;
   top: 0;
   z-index: 2;
-`;
-const ShadowBox = styled.div`
-  width: 75%;
-  height: 60px;
-  position: absolute;
-  bottom: 12px;
-  left: 0;
-  right: 0;
-  margin: auto;
-  border-radius: 0 0 50% 50%;
-  box-shadow: 0 7px 30px rgba(193, 222, 248, 1);
-  z-index: 0;
 `;
 /**
  *  staticSetting
@@ -101,15 +76,7 @@ class ArcDate extends PureComponent {
   }
 
   componentDidMount() {
-    this.draw("bg", "bgCircle");
-    this.draw("data", "dataNumber");
-    this.wrapNode.addEventListener(
-      "touchmove",
-      e => {
-        e.preventDefault();
-      },
-      { passive: false }
-    );
+    this.draw("dataNumber");
   }
 
   componentWillReceiveProps(nextProps) {
@@ -133,7 +100,6 @@ class ArcDate extends PureComponent {
     }
   }
   componentDidUpdate(prevProps) {
-    this.draw("bg", "bgCircle");
     if (this.isInertia) {
       const { q, viewDeg } = this.staticSetting;
       const { page } = this.computedSetting;
@@ -148,40 +114,20 @@ class ArcDate extends PureComponent {
         this.moveTo(v0, a);
       }
     } else {
-      this.draw("data", "dataNumber", true);
+      this.draw("dataNumber", true);
     }
   }
 
   cacheDeg = 0;
   deltaDeg = 0;
   // canvas 绘制派发
-  draw = (target, item, ...options) => {
-    const ctx = this[target];
-    return this[item](ctx, ...options);
+  draw = (item, ...options) => {
+    return this[item](this.canvasCtx, ...options);
   };
-  // canvas 清空派发
-  clear = target => {
+  // canvas 清空
+  clear = () => {
     const { canvasW, canvasH } = this.staticSetting;
-    this[target].clearRect(0, 0, canvasW, canvasH + 10);
-  };
-  /**
-   * 绘制图案
-   */
-  bgCircle = ctx => {
-    const { canvasW, canvasH, center, r } = this.staticSetting;
-    const lineargradient = ctx.createLinearGradient(
-      canvasW,
-      canvasH / 2,
-      0,
-      canvasH / 2
-    );
-    lineargradient.addColorStop(0, "#1ab6f4");
-    lineargradient.addColorStop(1, "#0b7fe6");
-    ctx.fillStyle = lineargradient;
-    ctx.beginPath();
-    ctx.arc(center.x, center.y, r, 0, Math.PI, false);
-    ctx.fill();
-    ctx.closePath();
+    this.canvasCtx.clearRect(0, 0, canvasW, canvasH + 10);
   };
 
   dataNumber = (ctx, isClickCall) => {
@@ -228,7 +174,6 @@ class ArcDate extends PureComponent {
 
       if (ele.value === selectedValue) {
         this.draw(
-          "data",
           "selectedCircle",
           center.x - Math.cos(currentDeg) * (r - 4) - 8,
           center.y + Math.sin(currentDeg) * (r - 4)
@@ -254,7 +199,7 @@ class ArcDate extends PureComponent {
     ctx.closePath();
   };
 
-  setRefCtx = name => el => {
+  setRefCtx = el => {
     if (!el) {
       return;
     }
@@ -263,7 +208,7 @@ class ArcDate extends PureComponent {
     el.height = rect.height * dpr;
     const ctx = el.getContext("2d");
     ctx.scale(dpr, dpr);
-    this[name] = ctx;
+    this.canvasCtx = ctx;
   };
 
   /**
@@ -290,7 +235,7 @@ class ArcDate extends PureComponent {
     const { q } = this.staticSetting;
     const deltaL = e.touches[0].pageX - this.startPoint.x; // 水平滑动距离
     this.deltaDeg = deltaL * q;
-    this.draw("data", "dataNumber");
+    this.draw("dataNumber");
   };
 
   touchEnd = e => {
@@ -352,7 +297,6 @@ class ArcDate extends PureComponent {
       this.onDataChange(nextValue > 0 ? 0 : nextValue);
     } else {
       // 回弹
-      // const relL = page * viewDeg - this.cacheDeg;
       const relL =
         (Math.floor(-this.props.selectedValue / 7) + page) * viewDeg -
         this.cacheDeg;
@@ -376,7 +320,7 @@ class ArcDate extends PureComponent {
       this.isAnimating = true;
       const { page } = this.computedSetting;
       const repain = () => {
-        this.draw("data", "dataNumber");
+        this.draw("dataNumber");
         this.isAnimating = false;
       };
       if (v0 < 0 && page === 0 && this.cacheDeg <= 0) {
@@ -397,7 +341,7 @@ class ArcDate extends PureComponent {
       v0 = nextV;
       this.cacheDeg += deltaL;
       repain();
-      let res = window.requestAnimationFrame(anime);
+      window.requestAnimationFrame(anime);
     };
     window.requestAnimationFrame(anime);
   };
@@ -416,7 +360,7 @@ class ArcDate extends PureComponent {
         const index = Math.round((currentDeg - this.cacheDeg) / deg) + 15;
         // 限制触发范围
         if (remainderDeg < deg / 3 || remainderDeg > (deg * 2) / 3) {
-          const { dataList, page } = this.computedSetting;
+          const { dataList } = this.computedSetting;
           this.onDataChange(dataList[index].value);
         }
       }
@@ -433,29 +377,15 @@ class ArcDate extends PureComponent {
 
   render() {
     const { canvasH, canvasW } = this.staticSetting;
-    const { children } = this.props;
     return (
-      <Wrap
-        innerRef={el => {
-          this.wrapNode = el;
-        }}
+      <DataCircle
+        innerRef={this.setRefCtx}
+        width={canvasW}
+        height={canvasH + 10}
+        onClick={this.clickHandle}
         onTouchStart={this.touchStart}
         onTouchMove={this.touchMove}
-        onClick={this.clickHandle}
-      >
-        <BackGround
-          innerRef={this.setRefCtx("bg")}
-          width={canvasW}
-          height={canvasH + 10}
-        />
-        <DataCircle
-          innerRef={this.setRefCtx("data")}
-          width={canvasW}
-          height={canvasH + 10}
-        />
-        <ShadowBox />
-        {children}
-      </Wrap>
+      />
     );
   }
 }
