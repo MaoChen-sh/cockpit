@@ -19,16 +19,25 @@ class Chart extends PureComponent {
   componentDidMount() {
     this.draw();
   }
-  componentDidUpdate(){
+  componentDidUpdate() {
     this.draw();
   }
   draw = () => {
     const { options } = this.props;
-    if(!options){
-      return
+    if (!options) {
+      return;
     }
     const chart = echarts.init(this.chart);
-    chart.setOption(options);
+    chart.setOption({
+      ...options,
+      series: options.series.map(ele => ({
+        ...ele,
+        ...{
+          hoverAnimation: false,
+          selectedOffset: 0
+        }
+      }))
+    });
   };
   render() {
     const { defaultStyles, className } = this.props;

@@ -169,7 +169,7 @@ class Surgery extends PureComponent {
               { value: 5, name: "三类手术" },
               { value: 10, name: "四类和特类手术" }
             ].map((ele, index) => (
-              <LegendItem color={colors[index]}>
+              <LegendItem color={colors[index]} key={index}>
                 <span>{ele.name}</span>
                 <span>{ele.value}</span>
               </LegendItem>

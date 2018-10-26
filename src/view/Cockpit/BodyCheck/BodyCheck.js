@@ -113,9 +113,9 @@ class BodyCheck extends PureComponent {
         if (result) {
           const { medicalExamination: obj } = result;
           this.setState({
-            total: obj.medicalExamination,
-            teamCount: obj.examinationGroup,
-            singleCount: obj.examinationIndividual
+            total: obj ? obj.medicalExamination : 0,
+            teamCount: obj ? obj.examinationGroup : 0,
+            singleCount: obj ? obj.examinationIndividual : 0
           });
         }
       })
@@ -169,9 +169,10 @@ class BodyCheck extends PureComponent {
               series: [
                 {
                   type: "pie",
-                  radius: ["50%", "90%"],
+                  radius: "90%",
                   center: ["50%", "50%"],
                   selectedMode: "single",
+                  roseType: "radius",
                   label: {
                     formatter: `{d}%`,
                     color: "#4a4a4a",
