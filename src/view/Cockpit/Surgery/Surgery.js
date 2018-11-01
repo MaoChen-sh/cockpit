@@ -1,24 +1,9 @@
 import React, { PureComponent } from "react";
-import { Header, Chart, BlockArea, List, RightArrow } from "components";
+import { Chart, BlockArea, RightArrow } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
-
-const HeaderContent = styled.div`
-  color: #fff;
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding-top: 16px;
-  line-height: 1;
-  h3 {
-    font-size: 12px;
-    opacity: 0.8;
-    margin-bottom: 6px;
-  }
-  p {
-    font-size: 32px;
-  }
-`;
+import { ListTemp, HeaderTemp } from "view/Cockpit/components";
+import fakeData from "config/fakeData";
 const NavList = styled.ul`
   display: flex;
   justify-content: space-around;
@@ -81,11 +66,13 @@ const LegendItem = styled.li`
     margin-right: 10px;
   }
 `;
+
 class Surgery extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      countListUp: true
+      countListUp: true,
+      dataType: "area"
     };
   }
 
@@ -94,18 +81,17 @@ class Surgery extends PureComponent {
       countListUp: !this.state.countListUp
     });
   };
-
+  onOptionChange = val => {
+    this.setState({
+      dataType: val === "科室" ? "class" : "area"
+    });
+  };
   render() {
-    const { countListUp } = this.state;
+    const { countListUp, dataType } = this.state;
     const colors = ["#32d9c1", "#ffc75b", "#f88287", "#24b1f3"];
     return (
       <div>
-        <Header defaultStyles={`margin-top: -66px; padding-top: 66px;`}>
-          <HeaderContent>
-            <h3>手术台数</h3>
-            <p>34</p>
-          </HeaderContent>
-        </Header>
+        <HeaderTemp small title={"手术台数"} count={34} />
         <BlockArea title={"不同类别的手术台数"}>
           <NavList>
             {[
@@ -177,41 +163,26 @@ class Surgery extends PureComponent {
           </Legend>
         </BlockArea>
         <BlockArea title={"不同科室手术例数"}>
-          <List
+          <ListTemp
             defaultStyles={`.list-title{padding-right: 42px}`}
             title={[
-              <div key={0}>科室/病区</div>,
-              <div
-                className={`list_title--sort ${countListUp ? "up" : "down"}`}
-                key={1}
-                onClick={this.onCountListSort}
-              >
-                手术例数
-              </div>
+              {
+                content: "病区",
+                options: ["病区", "科室"],
+                onChange: this.onOptionChange
+              },
+              {
+                content: "手术例数",
+                sort: countListUp ? "up" : "down",
+                onSort: this.onCountListSort
+              }
             ]}
-            // list={distributionList
-            //   .sort(
-            //     (a, b) =>
-            //       (countListUp ? -1 : 1) *
-            //       (a.outpatientEmergencyRegistration -
-            //         b.outpatientEmergencyRegistration)
-            //   )
-            //   .map(ele => {
-            //     const {
-            //       departmentName: name,
-            //       outpatientEmergencyRegistration: count
-            //     } = ele;
-            //     return {
-            //       content: (
-            //         <CountItem>
-            //           <span>{name}</span>
-            //           <span>
-            //             {count} <RightArrow shadow={false} />
-            //           </span>
-            //         </CountItem>
-            //       )
-            //     };
-            //   })}
+            list={fakeData[dataType]
+              .sort((a, b) => (countListUp ? -1 : 1) * (a.value - b.value))
+              .map(ele => ({
+                ...ele,
+                to: "/"
+              }))}
           />
         </BlockArea>
       </div>

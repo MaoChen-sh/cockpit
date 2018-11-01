@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  ArcDate,
   Header,
   Tab,
   BlockArea as BlockAreaBase,
@@ -8,7 +7,7 @@ import {
   Chart as ChartBase,
   RightArrow
 } from "components";
-import { NavItem } from "./components";
+import { NavItem, ArcDatePicker } from "./components";
 import styled from "styled-components";
 import { ReactComponent as outpatient_and_emerg } from "static/svg/outpatient_and_emerg.svg";
 import { ReactComponent as operation } from "static/svg/operation.svg";
@@ -18,6 +17,7 @@ import { ReactComponent as in_the_hospital } from "static/svg/in_the_hospital.sv
 import { ReactComponent as discharge_number } from "static/svg/discharge_number.svg";
 import { $fetch, apis } from "config";
 import { getDateParamsFromDateStr } from "tools";
+import { Link } from "react-router-dom";
 const CalendarView = styled.div`
   position: absolute;
   top: 67px;
@@ -42,9 +42,6 @@ const Chart = styled(ChartBase)`
   height: 120px;
 `;
 const propTypes = {};
-const oneDay = 24 * 3600 * 1000;
-const endDay = new Date() - oneDay;
-
 class Calendar extends React.PureComponent {
   render() {
     const { label } = this.props;
@@ -52,7 +49,7 @@ class Calendar extends React.PureComponent {
   }
 }
 
-const IncomeBox = styled.div`
+const IncomeBox = styled(Link)`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -82,8 +79,8 @@ const IncomeRight = styled.div`
   }
 `;
 
-const IncomeItem = ({ color, title, money }) => (
-  <IncomeBox>
+const IncomeItem = ({ color, title, money, to }) => (
+  <IncomeBox to={to}>
     <IncomeLeft color={color}>{title}</IncomeLeft>
     <IncomeRight>
       <span>{money && `￥${money}`}</span>
@@ -127,26 +124,12 @@ const Pointer = styled.div`
 class Cockpit extends Component {
   constructor(props) {
     super();
-    const {
-      match: {
-        params: { type }
-      }
-    } = props;
     this.state = {
       currentValue: 0,
-      currentDateText: this.getDateText(0, type),
+      currentDateText: "",
       counts: {},
       inCome: {}
     };
-  }
-
-  componentDidMount() {
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
-    this.get_data(this.state.currentDateText, type);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -161,11 +144,8 @@ class Cockpit extends Component {
       }
     } = nextProps;
     if (nextType !== type) {
-      const dateText = this.getDateText(0, nextType);
-      this.get_data(dateText, nextType);
       this.setState({
-        currentValue: 0,
-        currentDateText: dateText
+        currentValue: 0
       });
     }
   }
@@ -233,80 +213,17 @@ class Cockpit extends Component {
       .catch(error => console.error(error));
   };
 
-  onDateChange = value => {
+  onDateChange = (value, dateText) => {
     const {
       match: {
         params: { type }
       }
     } = this.props;
-    const dateText = this.getDateText(value, type);
     this.get_data(dateText, type);
     this.setState({
       currentValue: value,
       currentDateText: dateText
     });
-  };
-
-  getDateList = (finalIndex, length, type, passedCount = 0) => {
-    let [year, month, day] = new Date(endDay)
-      .toLocaleDateString()
-      .match(/\d+/g);
-    year = year - 1;
-    month = month - 1;
-    if (day < 2) {
-      month = month - 1;
-      if (month === -1) {
-        year = year - 1;
-      }
-    }
-    return Array(length)
-      .fill("")
-      .map((ele, index) => {
-        const value = index - finalIndex + passedCount;
-        switch (type) {
-          case "month":
-            return {
-              value: value,
-              label: 12 + ((month + value - 12) % 12)
-            };
-          case "year":
-            return {
-              value: value,
-              label: year + value
-            };
-          default:
-            return {
-              value: value,
-              label: new Date(endDay + value * oneDay).getDate()
-            };
-        }
-      });
-  };
-
-  getDateText = (value, type) => {
-    let [year, month, day] = new Date(endDay)
-      .toLocaleDateString()
-      .match(/\d+/g);
-
-    switch (type) {
-      case "month":
-        month = month - 1;
-        if (day < 2) {
-          month = month - 1;
-        }
-        const m = +month + value;
-        return `${+year + parseInt(m / 12)}年${12 + ((m - 12) % 12)}月`;
-      case "year":
-        year = year - 1;
-        if (day < 2 && month === 1) {
-          year = year - 1;
-        }
-        return `${year + value}年`;
-      default:
-        return new Date(endDay + value * oneDay)
-          .toLocaleDateString()
-          .replace(/(\d+).(\d+).(\d+)/, "$1年$2月$3日");
-    }
   };
 
   reduceNavItem = list => {
@@ -329,25 +246,11 @@ class Cockpit extends Component {
     }, []);
   };
   render() {
-    const {
-      props,
-      state,
-      onDateChange,
-      getDateText,
-      getDateList,
-      reduceNavItem
-    } = this;
+    const { props, state, onDateChange, reduceNavItem } = this;
     const {
       currentValue,
       currentDateText,
-      counts: {
-        hospitalizedPatients,
-        medicalExam,
-        medicalIncome,
-        medicalTech,
-        outpatientVolume,
-        surgery
-      },
+      counts: { hospitalizedPatients, medicalExam, outpatientVolume, surgery },
       inCome: { total, inHospital, unInHospital, drug, nonDrug }
     } = state;
     const {
@@ -356,7 +259,9 @@ class Cockpit extends Component {
       }
     } = props;
     const params = getDateParamsFromDateStr(currentDateText, type);
-    const searchs = Object.entries(params).map(ele=>ele.join('=')).join('&')
+    const searchs = Object.entries(params)
+      .map(ele => ele.join("="))
+      .join("&");
     return (
       <div>
         <Header>
@@ -370,13 +275,9 @@ class Cockpit extends Component {
           />
           {/* <DateInput type="date" /> */}
           <Calendar label={currentDateText} />
-          <ArcDate
+          <ArcDatePicker
             onChange={onDateChange}
-            selectedValue={currentValue}
-            computedSetting={{
-              getDataList: getDateList,
-              page: 0
-            }}
+            value={currentValue}
             type={type}
           />
         </Header>
@@ -395,7 +296,7 @@ class Cockpit extends Component {
                   svg: operation,
                   title: "手术台数",
                   count: surgery,
-                  to:"/cockpit/surgery"
+                  to: "/cockpit/surgery"
                 },
                 {
                   svg: physical_examination,
@@ -407,19 +308,19 @@ class Cockpit extends Component {
                   svg: admission_number,
                   title: "入院人数",
                   count: 34,
-                  to: ""
+                  to: "/cockpit/enterhospital"
                 },
                 {
                   svg: in_the_hospital,
                   title: "在院人数",
                   count: hospitalizedPatients,
-                  to: ""
+                  to: "/cockpit/inhospital"
                 },
                 {
                   svg: discharge_number,
                   title: "出院人数",
                   count: 34,
-                  to: ""
+                  to: "/cockpit/leavehospital"
                 }
               ].map(ele => ({
                 ...ele,
@@ -473,36 +374,35 @@ class Cockpit extends Component {
             list={[
               {
                 title: "医疗总收入",
-                money: total
+                money: total,
+                to: "/cockpit/income/total"
               },
               {
                 title: "门急诊收入",
                 color: "#24B1F3",
-                money: unInHospital
+                money: unInHospital,
+                to: "/cockpit/income/uninhospital"
               },
               {
                 title: "住院收入",
                 color: "#f27b7f",
-                money: inHospital
+                money: inHospital,
+                to: "/cockpit/income/inhospital"
               },
               {
                 title: "非药品收入",
                 color: "#4a4a4a",
-                money: nonDrug
+                money: nonDrug,
+                to: "/cockpit/income/nondrug"
               },
               {
                 title: "药品收入",
                 color: "#23d7bd",
-                money: drug
+                money: drug,
+                to: "/cockpit/income/drug"
               }
             ].map(ele => ({
-              content: (
-                <IncomeItem
-                  title={ele.title}
-                  color={ele.color || "transparent"}
-                  money={ele.money}
-                />
-              )
+              content: <IncomeItem {...ele} />
             }))}
           />
         </BlockArea>

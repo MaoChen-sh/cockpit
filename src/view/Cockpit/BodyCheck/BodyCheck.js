@@ -1,24 +1,8 @@
 import React, { PureComponent } from "react";
-import { Header, Chart, BlockArea, RightArrow } from "components";
+import { Chart, BlockArea, RightArrow } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
-
-const HeaderContent = styled.div`
-  color: #fff;
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding-top: 16px;
-  line-height: 1;
-  h3 {
-    font-size: 12px;
-    opacity: 0.8;
-    margin-bottom: 6px;
-  }
-  p {
-    font-size: 32px;
-  }
-`;
+import { HeaderTemp } from "view/Cockpit/components";
 
 const NavList = styled.ul`
   display: flex;
@@ -142,12 +126,7 @@ class BodyCheck extends PureComponent {
     }));
     return (
       <div>
-        <Header defaultStyles={`margin-top: -66px; padding-top: 66px;`}>
-          <HeaderContent>
-            <h3>体检人数</h3>
-            <p>{total}</p>
-          </HeaderContent>
-        </Header>
+        <HeaderTemp small title={"体检人数"} count={total} />
         <BlockArea title={"不同类型的体检人数"}>
           <NavList>
             {dataList.map((ele, index) => (

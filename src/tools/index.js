@@ -1,5 +1,8 @@
 const oneDay = 24 * 3600 * 1000;
 const getDateParamsFromDateStr = (date, type) => {
+  if (!date) {
+    return {};
+  }
   switch (type) {
     case "month":
       const [year, month] = date.match(/\d+/g);
@@ -30,4 +33,10 @@ const getDateParamsFromDateStr = (date, type) => {
   }
 };
 
-export { getDateParamsFromDateStr };
+/**
+ *
+ */
+const getMoney = number => {
+  return `￥${number.toLocaleString()}`;
+};
+export { getDateParamsFromDateStr, getMoney };

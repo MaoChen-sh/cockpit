@@ -2,8 +2,6 @@ const baseUrl =
   process.env.NODE_ENV === "development"
     ? "https://test-odc.rubikstack.com"
     : "";
-console.log(process.env.NODE_ENV);
-
 /**
  *  fetch
  */
@@ -63,6 +61,9 @@ const $fetch = {
  *  api_config
  */
 const apis = {
+  wechat: {
+    config: "/wechat/js-sdk/config", // 微信签名授权
+  },
   overall: {
     index: "/smart/overall", // 总体运营
     medical_income: "/smart/overall/medical_income", // 医疗总收入

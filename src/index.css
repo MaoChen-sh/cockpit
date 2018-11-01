@@ -156,7 +156,7 @@ input[type=search]::-webkit-search-results-decoration {
 
 /* public style*/
 .list_title--sort {
-  display: block;
+  display: inline-block;
   position: relative;
   padding-right: 12px;
 }

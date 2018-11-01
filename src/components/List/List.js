@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 const ListWrap = styled.div`
   ${p => p.defaultStyles};
 `;
@@ -34,17 +34,22 @@ const Item = styled.li`
 `;
 
 class List extends PureComponent {
+  linkTo = to => () => {
+    if(to){
+      this.props.history.push(to);
+    }
+  };
   render() {
     const { list = [], defaultStyles, className, title } = this.props;
     return (
       <ListWrap defaultStyles={defaultStyles} className={className}>
-        {title && <Title className={'list-title'}>{title}</Title>}
+        {title && <Title className={"list-title"}>{title}</Title>}
         <ListMenu>
           {list.map((ele, index) => {
             const { id, to, content } = ele;
             return (
-              <Item key={id || index}>
-                {to ? <Link to={to}>{content}</Link> : content}
+              <Item key={id || index} onClick={this.linkTo(to)}>
+                {content}
               </Item>
             );
           })}
@@ -60,4 +65,4 @@ List.propTypes = {
   list: PropTypes.array
 };
 
-export default List;
+export default withRouter(List);
