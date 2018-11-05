@@ -1,9 +1,10 @@
 import BottomNav from "./BottomNav";
-import ArcDate from "./ArcDate";
+import ArcData from "./ArcData";
 import Header from "./Header";
 import Tab from "./Tab";
 import BlockArea from "./BlockArea";
 import List from "./List";
 import RightArrow from "./RightArrow";
 import Chart from "./Chart";
-export { BottomNav, ArcDate,Header, Tab, BlockArea, List, RightArrow, Chart};
+import Calendar  from "./Calendar";
+export { BottomNav, ArcData,Header, Tab, BlockArea, List, RightArrow, Chart, Calendar };

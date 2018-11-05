@@ -5,7 +5,8 @@ import {
   BlockArea as BlockAreaBase,
   List as ListBase,
   Chart as ChartBase,
-  RightArrow
+  RightArrow,
+  Calendar
 } from "components";
 import { NavItem, ArcDatePicker } from "./components";
 import styled from "styled-components";
@@ -16,8 +17,9 @@ import { ReactComponent as admission_number } from "static/svg/admission_number.
 import { ReactComponent as in_the_hospital } from "static/svg/in_the_hospital.svg";
 import { ReactComponent as discharge_number } from "static/svg/discharge_number.svg";
 import { $fetch, apis } from "config";
-import { getDateParamsFromDateStr } from "tools";
+import { getDateParamsFromDate, getYMD } from "tools";
 import { Link } from "react-router-dom";
+
 const CalendarView = styled.div`
   position: absolute;
   top: 67px;
@@ -41,13 +43,6 @@ const Chart = styled(ChartBase)`
   width: 50%;
   height: 120px;
 `;
-const propTypes = {};
-class Calendar extends React.PureComponent {
-  render() {
-    const { label } = this.props;
-    return <CalendarView>{label}</CalendarView>;
-  }
-}
 
 const IncomeBox = styled(Link)`
   display: flex;
@@ -121,37 +116,51 @@ const Pointer = styled.div`
     padding: 0 10px;
   }
 `;
+const now = new Date(new Date().toLocaleDateString());
+const endDateObj = (type => {
+  let [year, month, day] = getYMD(now);
+  month = month - 1;
+  if (day < 2) {
+    month = month - 1;
+    if (month === -1) {
+      year = year - 1;
+    }
+  }
+  return {
+    year: new Date(`${year - 1}/1/1`),
+    month: new Date(`${year}/${month}/1`),
+    day: new Date(now - 24 * 3600000)
+  };
+})();
+
 class Cockpit extends Component {
   constructor(props) {
-    super();
+    super(props);
+    const {
+      match: {
+        params: { type }
+      }
+    } = props;
     this.state = {
-      currentValue: 0,
-      currentDateText: "",
+      currentDate: endDateObj[type],
       counts: {},
-      inCome: {}
+      inCome: {},
+      calenderView: false
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidMount() {
+    const { currentDate } = this.state;
+    this.get_data(currentDate);
+  }
+
+  get_data = date => {
     const {
       match: {
         params: { type }
       }
     } = this.props;
-    const {
-      match: {
-        params: { type: nextType }
-      }
-    } = nextProps;
-    if (nextType !== type) {
-      this.setState({
-        currentValue: 0
-      });
-    }
-  }
-
-  get_data = (date, type) => {
-    const params = getDateParamsFromDateStr(date, type);
+    const params = getDateParamsFromDate(date, type);
     this.get_overall(params);
     this.get_income(params);
   };
@@ -213,16 +222,12 @@ class Cockpit extends Component {
       .catch(error => console.error(error));
   };
 
-  onDateChange = (value, dateText) => {
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
-    this.get_data(dateText, type);
+  onDateChange = date => {
+    this.get_data(date);
+    console.log(date)
     this.setState({
-      currentValue: value,
-      currentDateText: dateText
+      currentDate: date,
+      calenderView: false
     });
   };
 
@@ -245,25 +250,62 @@ class Cockpit extends Component {
       ];
     }, []);
   };
+
+  showCalendar = () => {
+    this.setState({
+      calenderView: true
+    });
+  };
+  hideCalendar = () => {
+    this.setState({
+      calenderView: false
+    });
+  };
+
+  getDateStr = date => {
+    const [y, m, d] = getYMD(date);
+    const {
+      match: {
+        params: { type }
+      }
+    } = this.props;
+    switch (type) {
+      case "year":
+        return `${y}年`;
+      case "month":
+        return `${y}年${m}月`;
+      default:
+        return `${y}年${m}月${d}日`;
+    }
+  };
   render() {
     const { props, state, onDateChange, reduceNavItem } = this;
     const {
-      currentValue,
-      currentDateText,
+      currentDate,
       counts: { hospitalizedPatients, medicalExam, outpatientVolume, surgery },
-      inCome: { total, inHospital, unInHospital, drug, nonDrug }
+      inCome: { total, inHospital, unInHospital, drug, nonDrug },
+      calenderView
     } = state;
     const {
       match: {
         params: { type }
       }
     } = props;
-    const params = getDateParamsFromDateStr(currentDateText, type);
+    const params = getDateParamsFromDate(currentDate, type);
     const searchs = Object.entries(params)
       .map(ele => ele.join("="))
       .join("&");
     return (
       <div>
+        {calenderView && (
+          <Calendar
+            onChange={this.onDateChange}
+            onCancel={this.hideCalendar}
+            maxDate={endDateObj[type]}
+            defaultValue={currentDate}
+            type={type}
+          />
+        )}
         <Header>
           <Tab
             activeId={type}
@@ -273,11 +315,14 @@ class Cockpit extends Component {
               { content: "年报", id: "year", to: "/cockpit/home/year" }
             ]}
           />
-          {/* <DateInput type="date" /> */}
-          <Calendar label={currentDateText} />
+          <CalendarView onClick={this.showCalendar} >
+            {this.getDateStr(currentDate)}
+          </CalendarView>
+
           <ArcDatePicker
             onChange={onDateChange}
-            value={currentValue}
+            date={currentDate}
+            endDate={endDateObj[type]}
             type={type}
           />
         </Header>
@@ -413,7 +458,5 @@ class Cockpit extends Component {
     );
   }
 }
-
-Cockpit.propTypes = propTypes;
 
 export default Cockpit;

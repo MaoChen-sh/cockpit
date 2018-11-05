@@ -32,7 +32,7 @@ const defaultGetDataList = (finalIndex, length) => {
 /**
  *  Component
  */
-class ArcDate extends PureComponent {
+class ArcData extends PureComponent {
   constructor(props) {
     super();
     const { staticSetting, computedSetting, type, selectedValue } = props;
@@ -100,13 +100,19 @@ class ArcDate extends PureComponent {
     }
   }
   componentDidUpdate(prevProps) {
+    const {
+      finalVisibleIndex,
+      count,
+      viewCount,
+      q,
+      viewDeg
+    } = this.staticSetting;
     if (this.isInertia) {
-      const { q, viewDeg } = this.staticSetting;
       const { page } = this.computedSetting;
       if (this.props.selectedValue !== prevProps.selectedValue) {
         this.isInertia = false;
         let relL =
-          (Math.floor(-this.props.selectedValue / 7) + page) * viewDeg -
+          (Math.floor(-this.props.selectedValue / viewCount) + page) * viewDeg -
           this.cacheDeg;
         let v0 = (relL > 0 ? 1 : -1) * q;
         let t0 = (2 * relL) / v0;
@@ -114,6 +120,15 @@ class ArcDate extends PureComponent {
         this.moveTo(v0, a);
       }
     } else {
+      this.computedSetting.page = Math.ceil(
+        this.props.selectedValue / viewCount
+      );
+      this.computedSetting.dataList = this.props.computedSetting.getDataList(
+        finalVisibleIndex,
+        count,
+        this.props.type,
+        viewCount * Math.ceil(this.props.selectedValue / viewCount)
+      );
       this.draw("dataNumber", true);
     }
   }
@@ -167,7 +182,6 @@ class ArcDate extends PureComponent {
       );
       this.computedSetting.page += arrow;
     }
-
     // 循环绘制日期
     dataList.forEach((ele, index) => {
       const currentDeg = deg * index + routeDeg;
@@ -390,7 +404,7 @@ class ArcDate extends PureComponent {
   }
 }
 
-ArcDate.propTypes = {
+ArcData.propTypes = {
   staticSetting: PropTypes.object,
   onChange: PropTypes.func,
   selectedDate: PropTypes.number
@@ -399,4 +413,4 @@ ArcDate.propTypes = {
 export default ControllSwitchHoc({
   value: "selectedValue",
   defaultValue: "defaultSelectedValue"
-})(ArcDate);
+})(ArcData);

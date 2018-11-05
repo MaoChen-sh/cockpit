@@ -1,37 +1,21 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import { ArcDate } from "components";
-const oneDay = 24 * 3600 * 1000;
-const endDay = new Date() - oneDay;
+import { ArcData } from "components";
+import { getYMD } from "tools";
+
+const oneDay = 24 * 3600000;
 class ArcDatePicker extends PureComponent {
-  constructor(props) {
-    super(props);
-    const { type, onChange, value } = props;
-    onChange(value, this.getDateText(value, type));
-  }
   componentWillReceiveProps(nextProps) {
     const { type } = this.props;
-    const { type: nextType, value: nextValue, onChange } = nextProps;
+    const { type: nextType, onChange, endDate: nextEndDate } = nextProps;
     if (nextType !== type) {
-      const dateText = this.getDateText(0, nextType);
-      onChange(nextValue, dateText);
+      onChange(nextEndDate);
     }
   }
+
   getDateList = (finalIndex, length, type, passedCount = 0) => {
-    const endD = new Date(endDay);
-    let [year, month, day] = [
-      endD.getFullYear(),
-      endD.getMonth() + 1,
-      endD.getDate()
-    ];
-    year = year - 1;
-    month = month - 1;
-    if (day < 2) {
-      month = month - 1;
-      if (month === -1) {
-        year = year - 1;
-      }
-    }
+    const { endDate } = this.props;
+    let [year, month] = getYMD(endDate);
     return Array(length)
       .fill("")
       .map((ele, index) => {
@@ -50,54 +34,55 @@ class ArcDatePicker extends PureComponent {
           default:
             return {
               value: value,
-              label: new Date(endDay + value * oneDay).getDate()
+              label: new Date(endDate.valueOf() + value * oneDay).getDate()
             };
         }
       });
   };
   onDateChange = value => {
     const { type, onChange } = this.props;
-    const dateText = this.getDateText(value, type);
-    onChange(value, dateText);
+    const date = this.getDateFromValue(value, type);
+    onChange(date);
   };
-  getDateText = (value, type) => {
-    const endD = new Date(endDay);
-    let [year, month, day] = [
-      endD.getFullYear(),
-      endD.getMonth() + 1,
-      endD.getDate()
-    ];
+
+  getDateFromValue = (value, type) => {
+    const { endDate } = this.props;
+
+    let [year, month] = getYMD(endDate);
     switch (type) {
       case "month":
-        month = month - 1;
-        if (day < 2) {
-          month = month - 1;
-        }
         const m = +month + value;
-        return `${+year + parseInt(m / 12)}年${12 + ((m - 12) % 12)}月`;
+        return new Date(
+          `${+year + parseInt(m / 12)}/${12 + ((m - 12) % 12)}/1`
+        );
       case "year":
-        year = year - 1;
-        if (day < 2 && month === 1) {
-          year = year - 1;
-        }
-        return `${year + value}年`;
+        return new Date(`${year + value}/1/1`);
       default:
-        let newDate = new Date(endDay + value * oneDay);
-        let [newY, newM, newD] = [
-          newDate.getFullYear(),
-          newDate.getMonth() + 1,
-          newDate.getDate()
-        ];
-        return `${newY}年${newM}月${newD}日`;
+        return new Date(endDate.valueOf() + value * oneDay);
+    }
+  };
+
+  getValueFromDate = (date, type) => {
+    const { endDate } = this.props;
+    let [year, month] = getYMD(endDate);
+    let [vYear, vMonth] = getYMD(date);
+
+    switch (type) {
+      case "month":
+        return (vYear - year) * 12 + (vMonth - month);
+      case "year":
+        return vYear - year;
+      default:
+        return parseInt((date.valueOf() - endDate.valueOf()) / oneDay);
     }
   };
   render() {
     const { onDateChange, getDateList } = this;
-    const { value, type } = this.props;
+    const { date, type } = this.props;
     return (
-      <ArcDate
+      <ArcData
         onChange={onDateChange}
-        selectedValue={value}
+        selectedValue={this.getValueFromDate(date, type)}
         computedSetting={{
           getDataList: getDateList,
           page: 0
@@ -111,7 +96,7 @@ class ArcDatePicker extends PureComponent {
 ArcDatePicker.propTypes = {
   type: PropTypes.string,
   onChange: PropTypes.func,
-  value: PropTypes.number
+  date: PropTypes.object
 };
 
 export default ArcDatePicker;
