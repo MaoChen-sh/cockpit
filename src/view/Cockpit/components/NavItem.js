@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { RightArrow } from "components";
+import { RightArrow, Rate } from "components";
 import { withRouter } from "react-router-dom";
 const Wrap = styled.div`
   display: flex;
@@ -10,7 +10,7 @@ const Wrap = styled.div`
   margin: 18px 0;
   justify-content: flex-start;
   padding-left: 12px;
-  flex-shrink:0;
+  flex-shrink: 0;
   flex-grow: 0;
   &:nth-child(even) {
     padding-left: calc(5vw + 12px);
@@ -46,8 +46,10 @@ const TextContent = styled.div`
     font-size: 12px;
     color: #6b6b6b;
   }
-  & > p {
+  & > *:nth-child(n + 2) {
     margin-top: 10px;
+  }
+  & > p {
     font-size: 16px;
     color: #333333;
     height: 20px;
@@ -72,12 +74,13 @@ class NavItem extends PureComponent {
     }
   };
   render() {
-    const { svg: Svg, title, count } = this.props;
+    const { svg: Svg, title, count, rate } = this.props;
     return (
       <Wrap onClick={this.clickHandle}>
         <Svg />
         <TextContent>
           <h3>{title}</h3>
+          {rate && <Rate value={rate}/>}
           <p>
             <span>{count}</span>
             <RightArrow />
@@ -91,7 +94,8 @@ class NavItem extends PureComponent {
 NavItem.propTypes = {
   svg: PropTypes.func,
   title: PropTypes.string,
-  count: PropTypes.number
+  count: PropTypes.number,
+  rate: PropTypes.number
 };
 
 export default withRouter(NavItem);

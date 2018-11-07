@@ -7,4 +7,6 @@ import List from "./List";
 import RightArrow from "./RightArrow";
 import Chart from "./Chart";
 import Calendar  from "./Calendar";
-export { BottomNav, ArcData,Header, Tab, BlockArea, List, RightArrow, Chart, Calendar };
+import Rate  from "./Rate";
+import Table  from "./Table";
+export { BottomNav, ArcData,Header, Tab, BlockArea, List, RightArrow, Chart, Calendar, Rate, Table };

@@ -15,6 +15,7 @@ const Wrap = styled.div`
   ${p => p.defaultStyles};
 `;
 
+// TODO: split data & options;
 class Chart extends PureComponent {
   componentDidMount() {
     this.draw();
@@ -40,6 +41,7 @@ class Chart extends PureComponent {
     });
   };
   render() {
+    console.log('chart')
     const { defaultStyles, className } = this.props;
     return (
       <Wrap

@@ -30,7 +30,6 @@ const Title = styled.div`
     text-align: center;
     flex-grow: 1;
     font-size: 16px;
-    font-weight: bold;
   }
 `;
 const CalendarMain = styled(CalendarBase)`
@@ -50,7 +49,9 @@ const CalendarMain = styled(CalendarBase)`
       color: #ccc;
       font-size: 24px;
       opacity: 0.9;
+      padding: 0 10px;
     }
+
     .react-calendar__navigation__label {
       flex-grow: 0 !important;
       font-size: 14px;
@@ -71,14 +72,32 @@ const CalendarMain = styled(CalendarBase)`
   }
   .react-calendar__tile {
     padding: 1.25vw;
+    display: flex;
+    justify-content: center;
     time {
-      display: inline-block;
-      line-height: 11vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       width: 11vw;
       height: 11vw;
       border-radius: 50%;
       font-size: 12px;
     }
+    &.react-calendar__year-view__months__month {
+      padding: 15px;
+      time {
+        line-height: 16vw;
+        width: 16vw;
+        height: 16vw;
+        font-size: 16px;
+        color: #333;
+        p:first-child {
+          font-size: 14px;
+          color: #999;
+        }
+      }
+    }
+
     &.react-calendar__month-view__days__day--neighboringMonth {
       opacity: 0;
     }
@@ -91,6 +110,9 @@ const CalendarMain = styled(CalendarBase)`
       time {
         color: #fff;
         background: #1baffa;
+        & > * {
+          color: #fff !important;
+        }
       }
     }
     &[disabled] {
@@ -149,18 +171,23 @@ class Calendar extends PureComponent {
       month: "year",
       year: "decade"
     }[type];
+    const text = {
+      day: "选择日期",
+      month: "选择月份",
+      year: "选择年份"
+    }[type];
     return (
       <Wrap innerRef={el => (this.wrapNode = el)} onClick={this.onWrapClick}>
         <Title>
           <span onClick={this.cancel}>取消</span>
-          <h4>选择日期</h4>
+          <h4>{text}</h4>
           <span onClick={this.confirm}>确定</span>
         </Title>
         <CalendarMain
           className="calendar-main"
           view={viewType}
           maxDetail={viewType}
-          minDetail={'decade'}
+          minDetail={"decade"}
           calendarType={"US"}
           formatShortWeekday={date => weekArr[date.getDay()]}
           value={value}

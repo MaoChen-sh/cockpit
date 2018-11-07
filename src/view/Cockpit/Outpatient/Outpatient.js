@@ -3,10 +3,12 @@ import { Chart as ChartBase, BlockArea } from "components";
 import styled from "styled-components";
 import echarts from "echarts/lib/echarts";
 import { $fetch, apis } from "config";
-import { ListTemp, HeaderTemp } from "view/Cockpit/components";
+import { getYMD } from "tools";
+import { ListTemp, HeaderTemp, TableTemp as Table } from "view/Cockpit/components";
 const Chart = styled(ChartBase)`
   height: 150px;
 `;
+const oneDay = 24 * 3600 * 1000;
 class Outpatient extends PureComponent {
   constructor(props) {
     super(props);
@@ -23,7 +25,39 @@ class Outpatient extends PureComponent {
       countListUp: true // 列表降序分布
     };
   }
-  componentDidMount() {}
+  get beginDate() {
+    const {
+      location: { search }
+    } = this.props;
+    return search.match(/beginDate=([\d-]+)/)[1];
+  }
+  get endDate() {
+    const {
+      location: { search }
+    } = this.props;
+    return search.match(/endDate=([\d-]+)/)[1];
+  }
+  get dataList() {
+    const { outpatientData } = this.state;
+    return this.type === "day" ? outpatientData.slice(8, 18) : outpatientData;
+  }
+  get type() {
+    const {
+      location: { search }
+    } = this.props;
+    const [beginDate, endDate] = [
+      search.match(/beginDate=([\d-]+)/)[1],
+      search.match(/endDate=([\d-]+)/)[1]
+    ];
+    const reduce = new Date(endDate).valueOf() - new Date(beginDate).valueOf();
+    if (reduce > oneDay * 60) {
+      return "year";
+    }
+    if (reduce > oneDay * 15) {
+      return "month";
+    }
+    return "day";
+  }
 
   get_data = (...args) => {
     this.get_outpatient(...args); // 门诊量时段分布
@@ -43,7 +77,7 @@ class Outpatient extends PureComponent {
         const { result } = res;
         if (result) {
           this.setState({
-            outpatientData: result.outpatientEmergencyList.slice(8, 18),
+            outpatientData: result.outpatientEmergencyList,
             total: result.outpatientEmergency.totalOutpatientEmergency,
             outpatient: result.outpatient.totalOutpatient,
             emergency: result.emergency.totalEmergency
@@ -81,7 +115,6 @@ class Outpatient extends PureComponent {
   };
   render() {
     const {
-      outpatientData,
       distributionList,
       countListUp,
       total,
@@ -110,9 +143,23 @@ class Outpatient extends PureComponent {
         >
           <Chart
             options={{
+              tooltip: {
+                trigger: "axis",
+                axisPointer: {
+                  lineStyle: {
+                    type: "dotted",
+                    color: "#F2B241"
+                  }
+                },
+                backgroundColor: "#FF931E",
+                formatter: "{c0}<br /><span style='font-size: 9px'>{b0}</span>",
+                textStyle: {
+                  fontSize: 10
+                }
+              },
               grid: {
-                left: "24px",
-                right: "0",
+                left: "30px",
+                right: "20px",
                 top: "20px",
                 bottom: "16px"
               },
@@ -121,9 +168,18 @@ class Outpatient extends PureComponent {
                 axisTick: {
                   show: false
                 },
-                data: Array(10)
-                  .fill("")
-                  .map((ele, index) => index + 9),
+                data:
+                  this.type === "day"
+                    ? this.dataList.map((ele, index) => index + 9)
+                    : this.dataList.map((ele, index) =>
+                        getYMD(
+                          new Date(
+                            new Date(this.beginDate).valueOf() + oneDay * index
+                          )
+                        )
+                          .map(ele => (ele < 10 ? "0" + ele : ele))
+                          .join(".")
+                      ),
                 min: 0,
                 axisLine: {
                   lineStyle: {
@@ -131,6 +187,7 @@ class Outpatient extends PureComponent {
                   }
                 },
                 axisLabel: {
+                  interval: this.type === "day" ? 0 : this.dataList.length - 2,
                   margin: 4,
                   color: "#666",
                   fontSize: 10
@@ -158,9 +215,10 @@ class Outpatient extends PureComponent {
               },
               series: [
                 {
-                  data: outpatientData,
+                  data: this.dataList,
                   type: "line",
-                  symbol: "circle",
+                  showSymbol: this.type === "day",
+                  symbol: this.type === "day" ? "circle" : "emptyCircle",
                   symbolSize: 6,
                   label: {
                     show: true,
@@ -202,6 +260,30 @@ class Outpatient extends PureComponent {
           />
         </BlockArea>
         <BlockArea title={"不同科室门急诊人次"}>
+          <Table
+            data={distributionList
+              .map((ele, index) => ({
+                name: ele.departmentName,
+                value: ele.outpatientEmergencyRegistration,
+                to: "/",
+                id: index
+              }))
+              .sort((a, b) => (countListUp ? -1 : 1) * (a.value - b.value))}
+            columns={[
+              {
+                title: "科室",
+                render: ele => ele.name,
+                id: 0
+              },
+              {
+                title: "门诊人次",
+                sort: countListUp ? "up" : "down",
+                onSort: this.onCountListSort,
+                render: ele => ele.value,
+                id: 1
+              }
+            ]}
+          />
           <ListTemp
             title={[
               "科室",

@@ -6,7 +6,8 @@ import {
   List as ListBase,
   Chart as ChartBase,
   RightArrow,
-  Calendar
+  Calendar,
+  Rate
 } from "components";
 import { NavItem, ArcDatePicker } from "./components";
 import styled from "styled-components";
@@ -46,7 +47,7 @@ const Chart = styled(ChartBase)`
 
 const IncomeBox = styled(Link)`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   font-size: 14px;
   padding: 12px 0;
@@ -54,6 +55,8 @@ const IncomeBox = styled(Link)`
 `;
 const IncomeLeft = styled.div`
   color: #4a4a4a;
+  width: 90px;
+  margin-right: 16px;
   &::before {
     content: "";
     display: inline-block;
@@ -68,15 +71,18 @@ const IncomeRight = styled.div`
   color: #333333;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-grow: 1;
   & > span {
     margin-right: 10px;
     font-weight: bold;
   }
 `;
 
-const IncomeItem = ({ color, title, money, to }) => (
+const IncomeItem = ({ color, title, money, to, rate }) => (
   <IncomeBox to={to}>
     <IncomeLeft color={color}>{title}</IncomeLeft>
+    <Rate value={rate} />
     <IncomeRight>
       <span>{money && `￥${money}`}</span>
       <RightArrow />
@@ -143,8 +149,21 @@ class Cockpit extends Component {
     } = props;
     this.state = {
       currentDate: endDateObj[type],
-      counts: {},
-      inCome: {},
+      counts: {
+        outpatientVolume: {},
+        surgery: {},
+        medicalExam: {},
+        medicalIncome: {},
+        medicalTech: {},
+        hospitalizedPatients: {}
+      },
+      inCome: {
+        total: {},
+        inHospital: {},
+        unInHospital: {},
+        drug: {},
+        nonDrug: {}
+      },
       calenderView: false
     };
   }
@@ -181,18 +200,53 @@ class Cockpit extends Component {
         } = res.result || {};
         this.setState({
           counts: {
+            // 门急诊人次
             outpatientVolume: outpatientVolume
-              ? outpatientVolume.totalEmergencyVisits
-              : 0, // 门急诊人次
-            surgery: surgery ? surgery.totalSurgery : 0, // 手术台数
-            medicalExam: medicalExam ? medicalExam.totalMedicalExamination : 0, // 体检人数
-            medicalIncome: medicalIncome ? medicalIncome.totalIncome : 0, //  医疗总收入
+              ? {
+                  value: outpatientVolume.totalEmergencyVisits,
+                  rate: outpatientVolume.emergencyVisitsRate
+                }
+              : {},
+
+            // 手术台数
+            surgery: surgery
+              ? {
+                  value: surgery.totalSurgery,
+                  rate: surgery.surgeryRate
+                }
+              : {},
+
+            // 体检人数
+            medicalExam: medicalExam
+              ? {
+                  value: medicalExam.totalMedicalExamination,
+                  rate: medicalExam.medicalExaminationRate
+                }
+              : {},
+
+            // 医疗总收入
+            medicalIncome: medicalIncome
+              ? {
+                  value: medicalIncome.totalIncome,
+                  rate: medicalIncome.totalIncome // TODO:
+                }
+              : {},
+
+            // 总医技数
             medicalTech: medicalTech
-              ? medicalTech.totalMedicalTech
-              : medicalTech, // 	总医技数
+              ? {
+                  value: medicalTech.totalMedicalTech,
+                  rate: medicalTech.medicalTechRate
+                }
+              : {},
+
+            // 在院人数
             hospitalizedPatients: hospitalizedPatients
-              ? hospitalizedPatients.hosipotial
-              : 0 // 在院人数
+              ? {
+                  value: hospitalizedPatients.hosipotial,
+                  rate: hospitalizedPatients.hosipotialRate
+                }
+              : {}
           }
         });
       })
@@ -207,15 +261,36 @@ class Cockpit extends Component {
           res.result || {};
         this.setState({
           inCome: {
-            total: medicalIncome ? medicalIncome.totalIncome : 0,
+            total: medicalIncome
+              ? {
+                  value: medicalIncome.totalIncome,
+                  rate: medicalIncome.inComeRate
+                }
+              : {},
             inHospital: outpatientHospitalIncome
-              ? outpatientHospitalIncome.inHospitalIncome
-              : 0,
+              ? {
+                  value: outpatientHospitalIncome.inHospitalIncome,
+                  rate: outpatientHospitalIncome.inHospitalRate
+                }
+              : {},
             unInHospital: outpatientHospitalIncome
-              ? outpatientHospitalIncome.outpatientEmergencyIncome
-              : 0,
-            drug: drugIncome ? drugIncome.drugIncome : 0,
-            nonDrug: drugIncome ? drugIncome.nonDrugIncome : 0
+              ? {
+                  value: outpatientHospitalIncome.outpatientEmergencyIncome,
+                  rate: outpatientHospitalIncome.outpatientEmergencyRate
+                }
+              : {},
+            drug: drugIncome
+              ? {
+                  value: drugIncome.drugIncome,
+                  rate: drugIncome.drugRate
+                }
+              : {},
+            nonDrug: drugIncome
+              ? {
+                  value: drugIncome.nonDrugIncome,
+                  rate: drugIncome.nonDrugRate
+                }
+              : {}
           }
         });
       })
@@ -224,7 +299,6 @@ class Cockpit extends Component {
 
   onDateChange = date => {
     this.get_data(date);
-    console.log(date)
     this.setState({
       currentDate: date,
       calenderView: false
@@ -256,6 +330,7 @@ class Cockpit extends Component {
       calenderView: true
     });
   };
+  
   hideCalendar = () => {
     this.setState({
       calenderView: false
@@ -278,6 +353,7 @@ class Cockpit extends Component {
         return `${y}年${m}月${d}日`;
     }
   };
+
   render() {
     const { props, state, onDateChange, reduceNavItem } = this;
     const {
@@ -315,7 +391,7 @@ class Cockpit extends Component {
               { content: "年报", id: "year", to: "/cockpit/home/year" }
             ]}
           />
-          <CalendarView onClick={this.showCalendar} >
+          <CalendarView onClick={this.showCalendar}>
             {this.getDateStr(currentDate)}
           </CalendarView>
 
@@ -334,19 +410,22 @@ class Cockpit extends Component {
                 {
                   svg: outpatient_and_emerg,
                   title: "门急诊人次",
-                  count: outpatientVolume,
+                  count: outpatientVolume.value,
+                  rate: outpatientVolume.rate,
                   to: "/cockpit/outpatient"
                 },
                 {
                   svg: operation,
                   title: "手术台数",
-                  count: surgery,
+                  count: surgery.value,
+                  rate: surgery.rate,
                   to: "/cockpit/surgery"
                 },
                 {
                   svg: physical_examination,
                   title: "体检人数",
-                  count: medicalExam,
+                  count: medicalExam.value,
+                  rate: medicalExam.rate,
                   to: "/cockpit/bodycheck"
                 },
                 {
@@ -358,7 +437,8 @@ class Cockpit extends Component {
                 {
                   svg: in_the_hospital,
                   title: "在院人数",
-                  count: hospitalizedPatients,
+                  count: hospitalizedPatients.value,
+                  rate: hospitalizedPatients.rate,
                   to: "/cockpit/inhospital"
                 },
                 {
@@ -388,8 +468,8 @@ class Cockpit extends Component {
                     show: false
                   },
                   data: [
-                    { value: unInHospital, name: "门急诊收入" },
-                    { value: inHospital, name: "住院收入" }
+                    { value: unInHospital.value, name: "门急诊收入" },
+                    { value: inHospital.value, name: "住院收入" }
                   ]
                 }
               ]
@@ -408,8 +488,8 @@ class Cockpit extends Component {
                     show: false
                   },
                   data: [
-                    { value: nonDrug, name: "非药品收入" },
-                    { value: drug, name: "药品收入" }
+                    { value: nonDrug.value, name: "非药品收入" },
+                    { value: drug.value, name: "药品收入" }
                   ]
                 }
               ]
@@ -419,35 +499,40 @@ class Cockpit extends Component {
             list={[
               {
                 title: "医疗总收入",
-                money: total,
+                money: total.value,
+                rate: total.rate,
                 to: "/cockpit/income/total"
               },
               {
                 title: "门急诊收入",
                 color: "#24B1F3",
-                money: unInHospital,
+                money: unInHospital.value,
+                rate: unInHospital.rate,
                 to: "/cockpit/income/uninhospital"
               },
               {
                 title: "住院收入",
                 color: "#f27b7f",
-                money: inHospital,
+                money: inHospital.value,
+                rate: inHospital.rate,
                 to: "/cockpit/income/inhospital"
               },
               {
                 title: "非药品收入",
                 color: "#4a4a4a",
-                money: nonDrug,
+                money: nonDrug.value,
+                rate: nonDrug.rate,
                 to: "/cockpit/income/nondrug"
               },
               {
                 title: "药品收入",
                 color: "#23d7bd",
-                money: drug,
+                money: drug.value,
+                rate: drug.rate,
                 to: "/cockpit/income/drug"
               }
             ].map(ele => ({
-              content: <IncomeItem {...ele} />
+              content: <IncomeItem {...ele} {...type === 'day'?{rate: undefined}:{}} />
             }))}
           />
         </BlockArea>
