@@ -12,6 +12,7 @@ const Wrap = styled.div`
   padding-bottom: 48px;
   min-height: 100vh;
   background: #f5f5f5;
+  overflow: hidden;
 `;
 const Nav = styled(BottomNav)`
   svg.bottom-nav-svg__active {
@@ -89,17 +90,11 @@ class App extends Component {
 
   render() {
     const { location } = this.props;
-    const pathArr = location.pathname.match(/\w+/g) 
+    const pathArr = location.pathname.match(/\w+/g);
     return (
       <Wrap className="App">
         <Routers />
-        <Nav
-          navList={staticNavList}
-          activeId={
-            pathArr&&
-            pathArr[0]
-          }
-        />
+        <Nav navList={staticNavList} activeId={pathArr && pathArr[0]} />
       </Wrap>
     );
   }

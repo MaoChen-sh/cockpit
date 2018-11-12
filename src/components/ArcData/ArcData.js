@@ -297,7 +297,6 @@ class ArcData extends PureComponent {
 
     let a, v0, t0; // 加速度， 初速度， 时间
     let counterclockwise = l > 0; // 向右滑 —— 逆时针
-
     if (isInertia) {
       // 惯性
       if (!counterclockwise && page === 0 && selectedValue >= 0) {
@@ -365,7 +364,9 @@ class ArcData extends PureComponent {
    */
   clickHandle = e => {
     const { center, r, deg } = this.staticSetting;
-    const { clientX: x, clientY: y } = e;
+    let { clientX: x, clientY: y } = e;
+    const positionY = e.target.getBoundingClientRect().top
+     y = y-positionY 
     if (y > 90 && y < 150) {
       const squareR = Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2);
       if (squareR < Math.pow(r + 15, 2) && squareR > Math.pow(r - 25, 2)) {

@@ -43,6 +43,7 @@ class ArcDatePicker extends PureComponent {
     const { type, onChange } = this.props;
     const date = this.getDateFromValue(value, type);
     onChange(date);
+
   };
 
   getDateFromValue = (value, type) => {
@@ -53,7 +54,7 @@ class ArcDatePicker extends PureComponent {
       case "month":
         const m = +month + value;
         return new Date(
-          `${+year + parseInt(m / 12)}/${12 + ((m - 12) % 12)}/1`
+          `${+year + Math.floor(m / 12)}/${12 + ((m - 12) % 12)}/1`
         );
       case "year":
         return new Date(`${year + value}/1/1`);

@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import echarts from "echarts/lib/echarts";
@@ -15,20 +15,36 @@ const Wrap = styled.div`
   ${p => p.defaultStyles};
 `;
 
-// TODO: split data & options;
-class Chart extends PureComponent {
+class Chart extends Component {
   componentDidMount() {
     this.draw();
+  }
+  shouldComponentUpdate(nextProps) {
+    const { data } = this.props;
+    const { data: nextData } = nextProps;
+    if (JSON.stringify(data) !== JSON.stringify(nextData)) {
+      return true;
+    }
+    for (const key in this.props) {
+      if (this.props.hasOwnProperty(key) && key !== "data") {
+        if (this.props[key] !== nextProps[key]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
   componentDidUpdate() {
     this.draw();
   }
   draw = () => {
-    const { options } = this.props;
-    if (!options) {
+    const { getOptions, data } = this.props;
+    if (!getOptions) {
       return;
     }
     const chart = echarts.init(this.chart);
+    const options = getOptions(data);
     chart.setOption({
       ...options,
       series: options.series.map(ele => ({
@@ -41,7 +57,7 @@ class Chart extends PureComponent {
     });
   };
   render() {
-    console.log('chart')
+    console.log("chart");
     const { defaultStyles, className } = this.props;
     return (
       <Wrap
@@ -54,7 +70,10 @@ class Chart extends PureComponent {
 }
 
 Chart.propTypes = {
-  options: PropTypes.object
+  className: PropTypes.string,
+  defaultStyles: PropTypes.string,
+  getOptions: PropTypes.func,
+  data: PropTypes.array
 };
 
 export default Chart;

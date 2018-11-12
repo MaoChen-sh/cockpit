@@ -9,4 +9,5 @@ import Chart from "./Chart";
 import Calendar  from "./Calendar";
 import Rate  from "./Rate";
 import Table  from "./Table";
-export { BottomNav, ArcData,Header, Tab, BlockArea, List, RightArrow, Chart, Calendar, Rate, Table };
+import LinePointer  from "./LinePointer";
+export { BottomNav, ArcData,Header, Tab, BlockArea, List, RightArrow, Chart, Calendar, Rate, Table, LinePointer };

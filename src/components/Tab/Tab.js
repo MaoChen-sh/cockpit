@@ -8,6 +8,7 @@ const List = styled.ul`
   position: relative;
   z-index: 4;
   padding: 14px 5%;
+  ${p => p.defaultStyles}
 `;
 const Item = styled.li`
   width: 80px;
@@ -28,12 +29,17 @@ const Item = styled.li`
 
 class Tab extends PureComponent {
   render() {
-    const { list, activeId } = this.props;
+    const { list, activeId, className, defaultStyles } = this.props;
     return (
-      <List >
-        {list.map((ele) => {
+      <List className={className} defaultStyles={defaultStyles}>
+        {list.map(ele => {
+          const isActive = ele.id === activeId;
           return (
-            <Item key={ele.id} active={ele.id === activeId}>
+            <Item
+              key={ele.id}
+              active={isActive}
+              className={isActive ? "active" : ""}
+            >
               <Link to={ele.to}>{ele.content}</Link>
             </Item>
           );
@@ -44,6 +50,8 @@ class Tab extends PureComponent {
 }
 
 Tab.propTypes = {
+  className: PropTypes.string,
+  defaultStyles: PropTypes.string,
   activeIndex: PropTypes.number,
   list: PropTypes.array
 };

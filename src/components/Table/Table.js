@@ -15,9 +15,7 @@ const Main = styled(TableBase)`
     th:first-child {
       padding-left: 20px;
     }
-    th:last-child {
-      padding-right: 20px;
-    }
+ 
   }
   tbody > tr {
     position: relative;
@@ -25,11 +23,13 @@ const Main = styled(TableBase)`
     td:first-child {
       padding-left: 20px;
     }
-    td:last-child {
-      padding-right: 20px;
-    }
     &:last-child {
       border-bottom: none;
+    }
+  }
+  td,th{
+    i{
+      vertical-align: middle;
     }
   }
 `;

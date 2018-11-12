@@ -7,9 +7,14 @@ import {
   Chart as ChartBase,
   RightArrow,
   Calendar,
-  Rate
+  Rate,
+  LinePointer
 } from "components";
-import { NavItem, ArcDatePicker } from "./components";
+import {
+  NavItem,
+  ArcDatePicker,
+  TableTemp as TableBase
+} from "view/components";
 import styled from "styled-components";
 import { ReactComponent as outpatient_and_emerg } from "static/svg/outpatient_and_emerg.svg";
 import { ReactComponent as operation } from "static/svg/operation.svg";
@@ -19,7 +24,6 @@ import { ReactComponent as in_the_hospital } from "static/svg/in_the_hospital.sv
 import { ReactComponent as discharge_number } from "static/svg/discharge_number.svg";
 import { $fetch, apis } from "config";
 import { getDateParamsFromDate, getYMD } from "tools";
-import { Link } from "react-router-dom";
 
 const CalendarView = styled.div`
   position: absolute;
@@ -45,14 +49,6 @@ const Chart = styled(ChartBase)`
   height: 120px;
 `;
 
-const IncomeBox = styled(Link)`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  font-size: 14px;
-  padding: 12px 0;
-  width: 100%;
-`;
 const IncomeLeft = styled.div`
   color: #4a4a4a;
   width: 90px;
@@ -79,47 +75,17 @@ const IncomeRight = styled.div`
   }
 `;
 
-const IncomeItem = ({ color, title, money, to, rate }) => (
-  <IncomeBox to={to}>
-    <IncomeLeft color={color}>{title}</IncomeLeft>
-    <Rate value={rate} />
-    <IncomeRight>
-      <span>{money && `￥${money}`}</span>
-      <RightArrow />
-    </IncomeRight>
-  </IncomeBox>
-);
-
 const BlockArea = styled(BlockAreaBase)`
   & > h2 {
     color: #4a4a4a;
   }
 `;
-const Pointer = styled.div`
-  color: #999;
-  font-size: 10px;
-  position: relative;
-  text-align: center;
-  width: 95%;
-  margin: 15px auto;
-  &::before {
-    content: "";
-    position: absolute;
-    height: 2px;
-    background: #ccc;
-    top: 0;
-    left: 10px;
-    bottom: 0;
-    right: 10px;
-    margin: auto 0;
-    display: block;
+const Table = styled(TableBase)`
+  tbody > tr td:first-child {
+    padding-left: 0;
   }
-  & > span {
-    position: relative;
-    z-index: 2;
-    background: #f5f5f5;
-    display: inline-block;
-    padding: 0 10px;
+  tbody > tr td:last-child {
+    padding-right: 0;
   }
 `;
 const now = new Date(new Date().toLocaleDateString());
@@ -153,8 +119,8 @@ class Cockpit extends Component {
         outpatientVolume: {},
         surgery: {},
         medicalExam: {},
-        medicalIncome: {},
-        medicalTech: {},
+        admissions: {},
+        recover: {},
         hospitalizedPatients: {}
       },
       inCome: {
@@ -180,12 +146,26 @@ class Cockpit extends Component {
       }
     } = this.props;
     const params = getDateParamsFromDate(date, type);
-    this.get_overall(params);
-    this.get_income(params);
+    Promise.all([this.get_overall(params), this.get_income(params)])
+      .then(res =>
+        this.setState({
+          ...res[0],
+          ...res[1]
+        })
+      )
+      .catch(error => console.error(error));
   };
-
+  getValueRate = (obj, valueKey, rateKey) => {
+    return obj
+      ? {
+          value: obj[valueKey],
+          rate: obj[rateKey]
+        }
+      : {};
+  };
   get_overall = params => {
-    $fetch
+    const { getValueRate } = this;
+    return $fetch
       .get(apis.overall.index, {
         params
       })
@@ -193,108 +173,69 @@ class Cockpit extends Component {
         const {
           hospitalizedPatients,
           medicalExam,
-          medicalIncome,
-          medicalTech,
+          admissions,
+          recover,
           outpatientVolume,
           surgery
         } = res.result || {};
-        this.setState({
+        return {
           counts: {
             // 门急诊人次
-            outpatientVolume: outpatientVolume
-              ? {
-                  value: outpatientVolume.totalEmergencyVisits,
-                  rate: outpatientVolume.emergencyVisitsRate
-                }
-              : {},
-
+            outpatientVolume: getValueRate(
+              outpatientVolume,
+              "totalEmergencyVisits",
+              "emergencyVisitsRate"
+            ),
             // 手术台数
-            surgery: surgery
-              ? {
-                  value: surgery.totalSurgery,
-                  rate: surgery.surgeryRate
-                }
-              : {},
-
+            surgery: getValueRate(surgery, "totalSurgery", "surgeryRate"),
             // 体检人数
-            medicalExam: medicalExam
-              ? {
-                  value: medicalExam.totalMedicalExamination,
-                  rate: medicalExam.medicalExaminationRate
-                }
-              : {},
-
-            // 医疗总收入
-            medicalIncome: medicalIncome
-              ? {
-                  value: medicalIncome.totalIncome,
-                  rate: medicalIncome.totalIncome // TODO:
-                }
-              : {},
-
-            // 总医技数
-            medicalTech: medicalTech
-              ? {
-                  value: medicalTech.totalMedicalTech,
-                  rate: medicalTech.medicalTechRate
-                }
-              : {},
-
+            medicalExam: getValueRate(
+              medicalExam,
+              "totalMedicalExamination",
+              "medicalExaminationRate"
+            ),
+            // 入院人数
+            admissions: getValueRate(
+              admissions,
+              "admissions",
+              "admissionsRate"
+            ),
             // 在院人数
-            hospitalizedPatients: hospitalizedPatients
-              ? {
-                  value: hospitalizedPatients.hosipotial,
-                  rate: hospitalizedPatients.hosipotialRate
-                }
-              : {}
+            hospitalizedPatients: getValueRate(
+              hospitalizedPatients,
+              "hosipotial",
+              "hosipotialRate"
+            ),
+            // 出院人数
+            recover: getValueRate(recover, "recover", "recoverRate")
           }
-        });
-      })
-      .catch(error => console.error(error));
+        };
+      });
   };
 
   get_income = params => {
-    $fetch
-      .get(apis.overall.medical_income, { params })
-      .then(res => {
-        const { medicalIncome, outpatientHospitalIncome, drugIncome } =
-          res.result || {};
-        this.setState({
-          inCome: {
-            total: medicalIncome
-              ? {
-                  value: medicalIncome.totalIncome,
-                  rate: medicalIncome.inComeRate
-                }
-              : {},
-            inHospital: outpatientHospitalIncome
-              ? {
-                  value: outpatientHospitalIncome.inHospitalIncome,
-                  rate: outpatientHospitalIncome.inHospitalRate
-                }
-              : {},
-            unInHospital: outpatientHospitalIncome
-              ? {
-                  value: outpatientHospitalIncome.outpatientEmergencyIncome,
-                  rate: outpatientHospitalIncome.outpatientEmergencyRate
-                }
-              : {},
-            drug: drugIncome
-              ? {
-                  value: drugIncome.drugIncome,
-                  rate: drugIncome.drugRate
-                }
-              : {},
-            nonDrug: drugIncome
-              ? {
-                  value: drugIncome.nonDrugIncome,
-                  rate: drugIncome.nonDrugRate
-                }
-              : {}
-          }
-        });
-      })
-      .catch(error => console.error(error));
+    const { getValueRate } = this;
+    return $fetch.get(apis.overall.medical_income, { params }).then(res => {
+      const { medicalIncome, outpatientHospitalIncome, drugIncome } =
+        res.result || {};
+      return {
+        inCome: {
+          total: getValueRate(medicalIncome, "totalIncome", "inComeRate"),
+          inHospital: getValueRate(
+            outpatientHospitalIncome,
+            "inHospitalIncome",
+            "inHospitalRate"
+          ),
+          unInHospital: getValueRate(
+            outpatientHospitalIncome,
+            "outpatientEmergencyIncome",
+            "outpatientEmergencyRate"
+          ),
+          drug: getValueRate(drugIncome, "drugIncome", "drugRate"),
+          nonDrug: getValueRate(drugIncome, "nonDrugIncome", "nonDrugRate")
+        }
+      };
+    });
   };
 
   onDateChange = date => {
@@ -330,7 +271,7 @@ class Cockpit extends Component {
       calenderView: true
     });
   };
-  
+
   hideCalendar = () => {
     this.setState({
       calenderView: false
@@ -354,11 +295,69 @@ class Cockpit extends Component {
     }
   };
 
+  get hospitalChartData() {
+    const {
+      inCome: { inHospital, unInHospital }
+    } = this.state;
+    return [
+      { value: unInHospital.value, name: "门急诊收入" },
+      { value: inHospital.value, name: "住院收入" }
+    ];
+  }
+  getHospitalChartOption = data => ({
+    color: ["#24b1f3", "#f27b7f"],
+    series: [
+      {
+        type: "pie",
+        radius: ["50%", "90%"],
+        center: ["50%", "50%"],
+        selectedMode: "single",
+        label: {
+          show: false
+        },
+        data: data
+      }
+    ]
+  });
+
+  get drugChartData() {
+    const {
+      inCome: { drug, nonDrug }
+    } = this.state;
+    return [
+      { value: nonDrug.value, name: "非药品收入" },
+      { value: drug.value, name: "药品收入" }
+    ];
+  }
+
+  getDrugChartOption = data => ({
+    color: ["#FFB54F", "#23d7bd"],
+    series: [
+      {
+        type: "pie",
+        radius: ["50%", "90%"],
+        center: ["50%", "50%"],
+        selectedMode: "single",
+        label: {
+          show: false
+        },
+        data: data
+      }
+    ]
+  });
+
   render() {
     const { props, state, onDateChange, reduceNavItem } = this;
     const {
       currentDate,
-      counts: { hospitalizedPatients, medicalExam, outpatientVolume, surgery },
+      counts: {
+        hospitalizedPatients,
+        medicalExam,
+        outpatientVolume,
+        surgery,
+        admissions,
+        recover
+      },
       inCome: { total, inHospital, unInHospital, drug, nonDrug },
       calenderView
     } = state;
@@ -368,9 +367,12 @@ class Cockpit extends Component {
       }
     } = props;
     const params = getDateParamsFromDate(currentDate, type);
-    const searchs = Object.entries(params)
-      .map(ele => ele.join("="))
-      .join("&");
+    const searchs =
+      Object.entries(params)
+        .map(ele => ele.join("="))
+        .join("&") +
+      "&type=" +
+      type;
     return (
       <div>
         {calenderView && (
@@ -431,21 +433,23 @@ class Cockpit extends Component {
                 {
                   svg: admission_number,
                   title: "入院人数",
-                  count: 34,
-                  to: "/cockpit/enterhospital"
+                  count: admissions.value,
+                  rate: admissions.rate,
+                  to: "/cockpit/hospital/enter"
                 },
                 {
                   svg: in_the_hospital,
                   title: "在院人数",
                   count: hospitalizedPatients.value,
                   rate: hospitalizedPatients.rate,
-                  to: "/cockpit/inhospital"
+                  to: "/cockpit/hospital/in"
                 },
                 {
                   svg: discharge_number,
                   title: "出院人数",
-                  count: 34,
-                  to: "/cockpit/leavehospital"
+                  count: recover.value,
+                  rate: recover.rate,
+                  to: "/cockpit/hospital/leave"
                 }
               ].map(ele => ({
                 ...ele,
@@ -456,89 +460,84 @@ class Cockpit extends Component {
         </BlockArea>
         <BlockArea title={"收入分析"}>
           <Chart
-            options={{
-              color: ["#24b1f3", "#f27b7f"],
-              series: [
-                {
-                  type: "pie",
-                  radius: ["50%", "90%"],
-                  center: ["50%", "50%"],
-                  selectedMode: "single",
-                  label: {
-                    show: false
-                  },
-                  data: [
-                    { value: unInHospital.value, name: "门急诊收入" },
-                    { value: inHospital.value, name: "住院收入" }
-                  ]
-                }
-              ]
-            }}
+            getOptions={this.getHospitalChartOption}
+            data={this.hospitalChartData}
           />
           <Chart
-            options={{
-              color: ["#FFB54F", "#23d7bd"],
-              series: [
-                {
-                  type: "pie",
-                  radius: ["50%", "90%"],
-                  center: ["50%", "50%"],
-                  selectedMode: "single",
-                  label: {
-                    show: false
-                  },
-                  data: [
-                    { value: nonDrug.value, name: "非药品收入" },
-                    { value: drug.value, name: "药品收入" }
-                  ]
-                }
-              ]
-            }}
+            getOptions={this.getDrugChartOption}
+            data={this.drugChartData}
           />
-          <ListBase
-            list={[
+          <Table
+            noHeader
+            noArrow
+            data={[
               {
                 title: "医疗总收入",
                 money: total.value,
                 rate: total.rate,
-                to: "/cockpit/income/total"
+                to: "/cockpit/income/total",
+                id: 0
               },
               {
                 title: "门急诊收入",
                 color: "#24B1F3",
                 money: unInHospital.value,
                 rate: unInHospital.rate,
-                to: "/cockpit/income/uninhospital"
+                to: "/cockpit/income/uninhospital",
+                id: 1
               },
               {
                 title: "住院收入",
                 color: "#f27b7f",
                 money: inHospital.value,
                 rate: inHospital.rate,
-                to: "/cockpit/income/inhospital"
+                to: "/cockpit/income/inhospital",
+                id: 2
               },
               {
                 title: "非药品收入",
                 color: "#4a4a4a",
                 money: nonDrug.value,
                 rate: nonDrug.rate,
-                to: "/cockpit/income/nondrug"
+                to: "/cockpit/income/nondrug",
+                id: 3
               },
               {
                 title: "药品收入",
                 color: "#23d7bd",
                 money: drug.value,
                 rate: drug.rate,
-                to: "/cockpit/income/drug"
+                to: "/cockpit/income/drug",
+                id: 4
               }
             ].map(ele => ({
-              content: <IncomeItem {...ele} {...type === 'day'?{rate: undefined}:{}} />
+              ...ele,
+              to: { pathname: ele.to, search: searchs }
             }))}
+            columns={[
+              {
+                render: ele => (
+                  <IncomeLeft color={ele.color}>{ele.title}</IncomeLeft>
+                ),
+                id: 0
+              },
+              {
+                render: ele => <Rate value={ele.rate} />,
+                id: 1
+              },
+              {
+                render: ele => (
+                  <IncomeRight>
+                    <span>{ele.money && `￥${ele.money}`}</span>
+                    <RightArrow />
+                  </IncomeRight>
+                ),
+                id: 2
+              }
+            ]}
           />
         </BlockArea>
-        <Pointer>
-          <span>当天凌晨4点更新昨天数据</span>
-        </Pointer>
+        <LinePointer>当天凌晨4点更新昨天数据</LinePointer>
       </div>
     );
   }

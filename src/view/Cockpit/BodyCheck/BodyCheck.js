@@ -1,19 +1,25 @@
 import React, { PureComponent } from "react";
-import { Chart, BlockArea, RightArrow } from "components";
+import { Chart, BlockArea, RightArrow, Rate } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
-import { HeaderTemp } from "view/Cockpit/components";
+import { HeaderTemp } from "view/components";
 
 const NavList = styled.ul`
   display: flex;
   justify-content: space-around;
   & > li {
     width: 33%;
-    height: 42px;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    & > * {
+      padding-top: 5px;
+      padding-bottom: 5px;
+      &:first-child {
+        padding-top: 0;
+      }
+      &:last-child {
+        padding-bottom: 0;
+      }
+    }
     &:first-child {
       border-left: none;
     }
@@ -66,6 +72,8 @@ const LegendItem = styled.li`
     margin-right: 10px;
   }
 `;
+const colors = ["#ffc75b", "#23D7BD"];
+
 class BodyCheck extends PureComponent {
   constructor(props) {
     super(props);
@@ -77,7 +85,9 @@ class BodyCheck extends PureComponent {
     this.state = {
       total: "", // 总数
       teamCount: "", // 团队数
-      singleCount: "" // 个体数
+      teamRate: "", // 团队增长率
+      singleCount: "", // 个体数
+      singleRate: "" // 个体增长率
     };
   }
 
@@ -99,28 +109,55 @@ class BodyCheck extends PureComponent {
           this.setState({
             total: obj ? obj.medicalExamination : 0,
             teamCount: obj ? obj.examinationGroup : 0,
-            singleCount: obj ? obj.examinationIndividual : 0
+            teamRate: obj ? obj.groupExaminationRate : 0,
+            singleCount: obj ? obj.examinationIndividual : 0,
+            singleRate: obj ? obj.medicalExaminationRate : 0
           });
         }
       })
       .catch(err => console.error(err));
   };
-  render() {
-    const colors = ["#ffc75b", "#23D7BD"];
-    const { total, teamCount, singleCount } = this.state;
-    const dataList = [
+  get dataList() {
+    const { teamCount, teamRate, singleCount, singleRate } = this.state;
+    return [
       {
         title: "团队体检人数",
         count: teamCount,
+        rate: teamRate,
         to: "/cockpit/outpatient"
       },
       {
         title: "散客体检人数",
         count: singleCount,
+        rate: singleRate,
         to: "/cockpit/surgery"
       }
     ];
-    const canvasData = dataList.map(ele => ({
+  }
+  getOptions = data => {
+    return {
+      color: colors,
+      series: [
+        {
+          type: "pie",
+          radius: "90%",
+          center: ["50%", "50%"],
+          selectedMode: "single",
+          roseType: "radius",
+          label: {
+            formatter: `{d}%`,
+            color: "#4a4a4a",
+            fontSize: "12px"
+          },
+          labelLine: { length: 0 },
+          data: data
+        }
+      ]
+    }
+  }
+  render() {
+    const { total } = this.state;
+    const canvasData = this.dataList.map(ele => ({
       value: ele.count,
       name: ele.title
     }));
@@ -129,9 +166,10 @@ class BodyCheck extends PureComponent {
         <HeaderTemp small title={"体检人数"} count={total} />
         <BlockArea title={"不同类型的体检人数"}>
           <NavList>
-            {dataList.map((ele, index) => (
+            {this.dataList.map((ele, index) => (
               <li key={index}>
                 <h4>{ele.title}</h4>
+                {this.type !== "day" && <Rate value={ele.rate} />}
                 <p>
                   <span>{ele.count}</span>
                   <RightArrow />
@@ -143,25 +181,8 @@ class BodyCheck extends PureComponent {
         <BlockArea title={"不同类型体检人数占比"}>
           <Chart
             defaultStyles={`height: 120px;`}
-            options={{
-              color: colors,
-              series: [
-                {
-                  type: "pie",
-                  radius: "90%",
-                  center: ["50%", "50%"],
-                  selectedMode: "single",
-                  roseType: "radius",
-                  label: {
-                    formatter: `{d}%`,
-                    color: "#4a4a4a",
-                    fontSize: "12px"
-                  },
-                  labelLine: { length: 0 },
-                  data: canvasData
-                }
-              ]
-            }}
+            data= {canvasData}
+            getOptions={this.getOptions}
           />
           <Legend>
             {canvasData.map((ele, index) => (
