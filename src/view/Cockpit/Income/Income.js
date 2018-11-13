@@ -10,41 +10,36 @@ const oneDay = 24 * 3600 * 1000;
 const fakeData = [
   {
     name: "妇产科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "消化内科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "耳鼻喉科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "神经外科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "骨科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "肿瘤科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "产科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "肝脏移植科",
-    value: parseInt(Math.random()*100000)
   },
   {
     name: "血液科",
-    value: parseInt(Math.random()*100000)
   }
-];
+].map(ele=>({...ele, 
+  value: parseInt(Math.random()*100000),
+  rate: Math.random()-0.5
+}));
+const fakeChartData = Array(31).fill('').map(ele=> parseInt(Math.random()*1000000))
 class Income extends PureComponent {
   constructor(props) {
     super(props);
@@ -154,7 +149,7 @@ class Income extends PureComponent {
     }));
   }
   get chartData() {
-    return Array(31).fill('').map(ele=> parseInt(Math.random()*1000000));
+    return fakeChartData;
   }
   onCountListSort = () => {
     this.setState({
@@ -173,7 +168,10 @@ class Income extends PureComponent {
           }
         },
         backgroundColor: "#FF931E",
-        formatter: "{c0}<br /><span style='font-size: 9px'>{b0}</span>",
+        formatter: params=>{
+          const  {axisValue, value}=  params[0]
+        return `${getMoney(value)}<br /><span style='font-size: 9px'>${axisValue}</span>`
+        },
         textStyle: {
           fontSize: 10
         }
@@ -204,7 +202,7 @@ class Income extends PureComponent {
           interval: this.type === "day" ? 0 : data.length - 2,
           margin: 4,
           color: "#666",
-          fontSize: 10
+          fontSize: 10,
         }
       },
       yAxis: {
@@ -224,7 +222,8 @@ class Income extends PureComponent {
         axisLabel: {
           margin: 4,
           color: "#666",
-          fontSize: 10
+          fontSize: 10,
+          formatter: value=> parseInt(value/10000)+'w'
         }
       },
       series: [
@@ -272,8 +271,20 @@ class Income extends PureComponent {
       ]
     };
   };
+  
+  onCountListSort = () => {
+    this.setState({
+      countListSort: this.state.countListSort === "down" ? "up" : "down",
+      rateListSort: "none"
+    });
+  };
+  onRateListSort = () => {
+    this.setState({
+      countListSort: "none",
+      rateListSort: this.state.rateListSort === "down" ? "up" : "down"
+    });
+  };
   render() {
-    const { countListUp } = this.state;
     const {
       match: {
         params: { type }
