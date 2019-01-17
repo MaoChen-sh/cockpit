@@ -74,16 +74,16 @@ class NavItem extends PureComponent {
     }
   };
   render() {
-    const { svg: Svg, title, count, rate } = this.props;
+    const { svg: Svg, title, count, rate, noLink } = this.props;
     return (
       <Wrap onClick={this.clickHandle}>
         <Svg />
         <TextContent>
           <h3>{title}</h3>
-          {rate && <Rate value={rate}/>}
+          {rate && <Rate value={rate} />}
           <p>
             <span>{count}</span>
-            <RightArrow />
+            {noLink || <RightArrow />}
           </p>
         </TextContent>
       </Wrap>
@@ -95,7 +95,8 @@ NavItem.propTypes = {
   svg: PropTypes.func,
   title: PropTypes.string,
   count: PropTypes.number,
-  rate: PropTypes.number
+  rate: PropTypes.number,
+  noLink: PropTypes.bool
 };
 
 export default withRouter(NavItem);

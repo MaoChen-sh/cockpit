@@ -33,7 +33,6 @@ const Tab = styled(TabBase)`
 const now = new Date(new Date().toLocaleDateString());
 const endDate = (type => {
   let [year, month, day] = getYMD(now);
-  month = month - 1;
   if (day < 2) {
     month = month - 1;
     if (month === -1) {
@@ -46,6 +45,7 @@ class Norms extends PureComponent {
   constructor(props) {
     super(props);
     this.get_listData();
+    console.log(endDate);
     this.state = {
       currentDate: endDate,
       calenderView: false,

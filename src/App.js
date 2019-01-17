@@ -101,6 +101,6 @@ class App extends Component {
 }
 
 function wxSign() {
-  return $fetch.get(apis.wechat.config);
+  return $fetch.get(apis.wechat.config, null, true);
 }
 export default App;

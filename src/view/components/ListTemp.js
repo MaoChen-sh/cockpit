@@ -2,7 +2,6 @@ import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { List, RightArrow } from "components";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
 import { Select as SelectBase } from "wowjoy-component";
 const ListItem = styled.div`
   width: 100%;

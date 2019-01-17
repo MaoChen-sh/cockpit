@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import { Chart, BlockArea, Rate } from "components";
 import { TableTemp as Table, HeaderTemp } from "view/components";
-import { $fetch, apis } from "config";
+// import { $fetch, apis } from "config";
 import echarts from "echarts/lib/echarts";
 import { getMoney } from "tools";
 import { getYMD } from "tools";

@@ -1,5 +1,4 @@
 import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
 import { Table as TableBase } from "wowjoy-component";
 import styled from "styled-components";
 
@@ -39,6 +38,5 @@ class Table extends PureComponent {
   }
 }
 
-Table.propTypes = {};
 
 export default Table;

@@ -124,16 +124,13 @@ class Outpatient extends PureComponent {
           endDate
         }
       })
-      .then(res => {
-        const { result } = res;
-        if (result) {
-          this.setState({
-            outpatientData: result.outpatientEmergencyList,
-            total: result.outpatientEmergency.totalOutpatientEmergency,
-            outpatient: result.outpatient.totalOutpatient,
-            emergency: result.emergency.totalEmergency
-          });
-        }
+      .then(result => {
+        this.setState({
+          outpatientData: result.outpatientEmergencyList,
+          total: result.outpatientEmergency.totalOutpatientEmergency,
+          outpatient: result.outpatient.totalOutpatient,
+          emergency: result.emergency.totalEmergency
+        });
       })
       .catch(err => console.error(err));
   };
@@ -147,8 +144,7 @@ class Outpatient extends PureComponent {
           endDate
         }
       })
-      .then(res => {
-        const { result } = res;
+      .then(result => {
         if (result && result.emergencyDepartTop) {
           this.setState({
             distributionList: result.emergencyDepartTop

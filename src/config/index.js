@@ -5,11 +5,27 @@ const baseUrl =
 /**
  *  fetch
  */
+function hashStr(str) {
+  let hash = 0;
+  if (str.length === 0) return hash;
+  for (let i = 0; i < str.length; i++) {
+    let char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; 
+  }
+  return hash;
+}
+function readCache(url, options, res) {
+  return JSON.parse(sessionStorage.getItem(hashStr(url  + JSON.stringify(options))));
+}
+function cacheFetch(url, options, res) {
+  sessionStorage.setItem(hashStr(url + JSON.stringify(options)), JSON.stringify(res));
+}
 const $fetch = {
-  base: (url, options) => {
+  base: (url, options, noCache) => {
     const { params } = options;
-    if(!url){
-      throw new Error('url is empty, 请求路径未设置')
+    if (!url) {
+      throw new Error("url is empty, 请求路径未设置");
     }
     if (params) {
       const str = Object.entries(params)
@@ -22,6 +38,13 @@ const $fetch = {
       }
       Reflect.deleteProperty(options, "params");
     }
+    if (!noCache) {
+      const cachedData = readCache(baseUrl + url, options);
+      if (cachedData) {
+        return Promise.resolve(cachedData);
+      }
+    }
+
     return fetch(baseUrl + url, { ...options })
       .then(res => {
         if (res.status >= 200 && res.status < 300) {
@@ -30,10 +53,20 @@ const $fetch = {
 
         throw new Error(res.status);
       })
-      .then(res => res.json());
+      .then(res => res.json())
+      .then(res => {
+        const result = res.result || {};
+        !noCache && cacheFetch(baseUrl + url, options, result);
+        return result;
+      });
   },
-  get(url, options) {
-    return this.base(url, { ...options, method: "get" });
+
+  get(url, options, noCache) {
+    return this.base(
+      url,
+      { ...options, method: "get" },
+      noCache
+    );
   },
   post(url, options) {
     return this.base(url, {
@@ -65,7 +98,7 @@ const $fetch = {
  */
 const apis = {
   wechat: {
-    config: "/wechat/js-sdk/config", // 微信签名授权
+    config: "/wechat/js-sdk/config" // 微信签名授权
   },
   overall: {
     index: "/smart/overall", // 总体运营
@@ -73,7 +106,7 @@ const apis = {
     outpatient: "/smart/overall/outpatient", // 总门诊量
     medical_examination: "/smart/overall/medical_examination", // 总体检人数
     surgery: "/smart/overall/surgery", // 总手术台数
-    hospitalized: "/smart/overall/hospitalized", // 住院在院人数
+    hospitalized: "/smart/overall/hospitalized" // 住院在院人数
   },
   emergency: {
     index: "/smart/emergency", // 门急诊

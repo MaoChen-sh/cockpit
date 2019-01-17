@@ -22,7 +22,7 @@ class BlockArea extends PureComponent {
     const { defaultStyles, className, title, children } = this.props;
     return (
       <Box defaultStyles={defaultStyles} className={className}>
-        <NavTitle className={"block-area-title"}>{title}</NavTitle>
+        {title && <NavTitle className={"block-area-title"}>{title}</NavTitle>}
         {children}
       </Box>
     );

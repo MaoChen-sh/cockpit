@@ -42,7 +42,7 @@ const Select = styled(SelectBase)`
   &.open {
     box-shadow: none;
     color: #0d86e8;
-    &::after{
+    &::after {
       border-top: 4px solid #0d86e8;
     }
   }
@@ -142,9 +142,10 @@ class TableTemp extends PureComponent {
           };
         });
   }
-  rowClick = ele => {
-    const { to } = ele;
+  rowClick = (ele, rowIndex) => {
+    const { to, onClick } = ele;
     if (to) this.props.history.push(to);
+    if (onClick) onClick(ele, rowIndex);
   };
   render() {
     const { className, defaultStyles, data, noHeader } = this.props;

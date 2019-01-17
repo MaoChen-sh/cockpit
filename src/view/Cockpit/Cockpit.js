@@ -169,7 +169,7 @@ class Cockpit extends Component {
       .get(apis.overall.index, {
         params
       })
-      .then(res => {
+      .then(result => {
         const {
           hospitalizedPatients,
           medicalExam,
@@ -177,7 +177,7 @@ class Cockpit extends Component {
           recover,
           outpatientVolume,
           surgery
-        } = res.result || {};
+        } = result;
         return {
           counts: {
             // 门急诊人次
@@ -215,9 +215,8 @@ class Cockpit extends Component {
 
   get_income = params => {
     const { getValueRate } = this;
-    return $fetch.get(apis.overall.medical_income, { params }).then(res => {
-      const { medicalIncome, outpatientHospitalIncome, drugIncome } =
-        res.result || {};
+    return $fetch.get(apis.overall.medical_income, { params }).then(result => {
+      const { medicalIncome, outpatientHospitalIncome, drugIncome } = result;
       return {
         inCome: {
           total: getValueRate(medicalIncome, "totalIncome", "inComeRate"),
@@ -247,12 +246,17 @@ class Cockpit extends Component {
   };
 
   reduceNavItem = list => {
+    const {
+      match: {
+        params: { type }
+      }
+    } = this.props;
     return list.reduce((total, ele, index) => {
       if (index % 2) {
         total[total.length - 1] = {
           content: [
             ...total[total.length - 1].content,
-            <NavItem key={0} {...ele} />
+            <NavItem key={0} {...ele} noLink={type === "year"} />
           ]
         };
         return total;
@@ -260,7 +264,7 @@ class Cockpit extends Component {
       return [
         ...total,
         {
-          content: [<NavItem key={1} {...ele} />]
+          content: [<NavItem key={1} {...ele} noLink={type === "year"} />]
         }
       ];
     }, []);
@@ -345,6 +349,12 @@ class Cockpit extends Component {
       }
     ]
   });
+  animationEndCallBack;
+
+  onAnimationEndCallBack = () => {
+    typeof this.animationEndCallBack === "function" &&
+      this.animationEndCallBack();
+  };
 
   render() {
     const { props, state, onDateChange, reduceNavItem } = this;
@@ -359,7 +369,8 @@ class Cockpit extends Component {
         recover
       },
       inCome: { total, inHospital, unInHospital, drug, nonDrug },
-      calenderView
+      calenderView,
+      onAnimationEndCallBack
     } = state;
     const {
       match: {
@@ -398,6 +409,7 @@ class Cockpit extends Component {
           </CalendarView>
 
           <ArcDatePicker
+            onAnimationEndCallBack={onAnimationEndCallBack}
             onChange={onDateChange}
             date={currentDate}
             endDate={endDateObj[type]}
@@ -453,7 +465,7 @@ class Cockpit extends Component {
                 }
               ].map(ele => ({
                 ...ele,
-                to: { pathname: ele.to, search: searchs }
+                to: type === "year" ? "" : { pathname: ele.to, search: searchs }
               }))
             )}
           />
@@ -512,7 +524,7 @@ class Cockpit extends Component {
               }
             ].map(ele => ({
               ...ele,
-              to: { pathname: ele.to, search: searchs }
+              to: type === "year" ? "" : { pathname: ele.to, search: searchs }
             }))}
             columns={[
               {
@@ -529,7 +541,7 @@ class Cockpit extends Component {
                 render: ele => (
                   <IncomeRight>
                     <span>{ele.money && `￥${ele.money}`}</span>
-                    <RightArrow />
+                    {ele.to && <RightArrow />}
                   </IncomeRight>
                 ),
                 id: 2

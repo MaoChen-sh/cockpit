@@ -322,6 +322,7 @@ class ArcData extends PureComponent {
   };
   moveTo = (v, a) => {
     const { viewDeg } = this.staticSetting;
+    const { onAnimationEndCallBack } = this.props;
     let v0 = v;
     let a0 = a;
     let t0 = new Date();
@@ -349,6 +350,7 @@ class ArcData extends PureComponent {
       if (nextV === 0 || v0 / nextV < 0) {
         this.cacheDeg = Math.round(this.cacheDeg / viewDeg) * viewDeg;
         repain();
+        onAnimationEndCallBack&&onAnimationEndCallBack()
         return;
       }
       v0 = nextV;
@@ -408,7 +410,8 @@ class ArcData extends PureComponent {
 ArcData.propTypes = {
   staticSetting: PropTypes.object,
   onChange: PropTypes.func,
-  selectedDate: PropTypes.number
+  selectedDate: PropTypes.number,
+  onAnimationEndCallBack: PropTypes.func,
 };
 
 export default ControllSwitchHoc({

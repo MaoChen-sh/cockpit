@@ -73,7 +73,6 @@ const LegendItem = styled.li`
     margin-right: 10px;
   }
 `;
-const oneDay = 24 * 3600 * 1000;
 const colors = ["#32d9c1", "#ffc75b", "#f88287", "#24b1f3"];
 
 class Surgery extends PureComponent {
@@ -221,39 +220,36 @@ class Surgery extends PureComponent {
           endDate
         }
       })
-      .then(res => {
-        const { result } = res;
-        if (result) {
-          const { surgery, surgeryLevel, surgeryType } = result;
-          this.setState({
-            total: surgery.totalSurgery,
-            diffLevelSurgery: {
-              first: surgeryLevel.oneTypeSurgeryCount,
-              second: surgeryLevel.twoTypeSurgeryCount,
-              third: surgeryLevel.threeTypeSurgeryCount,
-              fourthAbove:
-                surgeryLevel.fourTypeSurgeryCount +
-                surgeryLevel.specialSurgeryCount
-            },
-            diffTypeSurgery: {
-              outpatient: getValueRate(
-                surgeryType,
-                "emerSurgeryCount",
-                "emerSurgeryRate"
-              ), // 门诊
-              elective: getValueRate(
-                surgeryType,
-                "electiveSurgeryCount",
-                "electiveSurgeryRate"
-              ), // 择期
-              emergency: getValueRate(
-                surgeryType,
-                "emerSurgeryCount",
-                "emerSurgeryRate"
-              ) // 急诊
-            }
-          });
-        }
+      .then(result => {
+        const { surgery, surgeryLevel, surgeryType } = result;
+        this.setState({
+          total: surgery.totalSurgery,
+          diffLevelSurgery: {
+            first: surgeryLevel.oneTypeSurgeryCount,
+            second: surgeryLevel.twoTypeSurgeryCount,
+            third: surgeryLevel.threeTypeSurgeryCount,
+            fourthAbove:
+              surgeryLevel.fourTypeSurgeryCount +
+              surgeryLevel.specialSurgeryCount
+          },
+          diffTypeSurgery: {
+            outpatient: getValueRate(
+              surgeryType,
+              "emerSurgeryCount",
+              "emerSurgeryRate"
+            ), // 门诊
+            elective: getValueRate(
+              surgeryType,
+              "electiveSurgeryCount",
+              "electiveSurgeryRate"
+            ), // 择期
+            emergency: getValueRate(
+              surgeryType,
+              "emerSurgeryCount",
+              "emerSurgeryRate"
+            ) // 急诊
+          }
+        });
       });
   };
 

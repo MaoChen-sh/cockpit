@@ -16,7 +16,7 @@ const Title = styled.div`
   padding: 0 20px;
   justify-content:space-between;
   &>*{
-    flex-shrink:0
+    flex-shrink:0;
     flex-grow:0
   }
 `;

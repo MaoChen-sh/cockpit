@@ -102,18 +102,15 @@ class BodyCheck extends PureComponent {
           endDate
         }
       })
-      .then(res => {
-        const { result } = res;
-        if (result) {
-          const { medicalExamination: obj } = result;
-          this.setState({
-            total: obj ? obj.medicalExamination : 0,
-            teamCount: obj ? obj.examinationGroup : 0,
-            teamRate: obj ? obj.groupExaminationRate : 0,
-            singleCount: obj ? obj.examinationIndividual : 0,
-            singleRate: obj ? obj.medicalExaminationRate : 0
-          });
-        }
+      .then(result => {
+        const { medicalExamination: obj } = result;
+        this.setState({
+          total: obj ? obj.medicalExamination : 0,
+          teamCount: obj ? obj.examinationGroup : 0,
+          teamRate: obj ? obj.groupExaminationRate : 0,
+          singleCount: obj ? obj.examinationIndividual : 0,
+          singleRate: obj ? obj.medicalExaminationRate : 0
+        });
       })
       .catch(err => console.error(err));
   };
@@ -153,8 +150,8 @@ class BodyCheck extends PureComponent {
           data: data
         }
       ]
-    }
-  }
+    };
+  };
   render() {
     const { total } = this.state;
     const canvasData = this.dataList.map(ele => ({
@@ -181,7 +178,7 @@ class BodyCheck extends PureComponent {
         <BlockArea title={"不同类型体检人数占比"}>
           <Chart
             defaultStyles={`height: 120px;`}
-            data= {canvasData}
+            data={canvasData}
             getOptions={this.getOptions}
           />
           <Legend>

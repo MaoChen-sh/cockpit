@@ -18,7 +18,7 @@ const Wrap = styled.div`
   padding-left: 18px;
   display: inline-block;
   position: relative;
-  color:  ${p => colors[p.status]};
+  color: ${p => colors[p.status]};
   &::before {
     content: "";
     position: absolute;
@@ -60,8 +60,8 @@ class Rate extends PureComponent {
 
   render() {
     const { className, defaultStyles, value } = this.props;
-    if(value === undefined){
-      return null
+    if (value === undefined) {
+      return null;
     }
     return (
       <Wrap
@@ -75,6 +75,10 @@ class Rate extends PureComponent {
   }
 }
 
-Rate.propTypes = {};
+Rate.propTypes = {
+  className: PropTypes.string,
+  defaultStyles: PropTypes.string,
+  value: PropTypes.number
+};
 
 export default Rate;

@@ -165,7 +165,7 @@ class Calendar extends PureComponent {
   cacheValue = null;
   wrapNode = {};
   render() {
-    const { value, maxDate, type } = this.props;
+    const { value, maxDate, type, selectRange } = this.props;
     const viewType = {
       day: "month",
       month: "year",
@@ -194,6 +194,7 @@ class Calendar extends PureComponent {
           onChange={this.onClickDay}
           maxDate={maxDate}
           formatMonth={date => getMonthNode(date.getMonth())}
+          selectRange = {selectRange}
         />
       </Wrap>
     );
@@ -204,7 +205,6 @@ class Calendar extends PureComponent {
     }
   };
   onClickMonth = date => {
-    console.log(date);
     return false;
   };
   onClickDay = date => {
@@ -228,8 +228,10 @@ class Calendar extends PureComponent {
 Calendar.propTypes = {
   onCancel: PropTypes.func,
   onConfirm: PropTypes.func,
-  value: PropTypes.object,
-  onChange: PropTypes.func
+  value: PropTypes.oneOfType([PropTypes.object,PropTypes.array]),
+  onChange: PropTypes.func,
+  selectRange: PropTypes.bool,
+
 };
 
 export default ControllSwitchHoc({})(Calendar);

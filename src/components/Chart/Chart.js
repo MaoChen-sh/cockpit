@@ -57,7 +57,6 @@ class Chart extends Component {
     });
   };
   render() {
-    console.log("chart");
     const { defaultStyles, className } = this.props;
     return (
       <Wrap

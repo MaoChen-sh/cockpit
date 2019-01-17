@@ -150,28 +150,25 @@ class Hospital extends PureComponent {
           endDate
         }
       })
-      .then(res => {
-        const { result } = res;
-        if (result) {
-          const {
-            hospitalizedPatients,
-            outHospital,
-            inHospital,
-            inHospitalDeath,
-            autoOutHospital,
-            icu
-          } = result;
-          this.setState({
-            inHospital: hospitalizedPatients.totalInHospital,
-            death: inHospitalDeath.inHospitalDeath,
-            icu: icu.icu,
+      .then(result => {
+        const {
+          hospitalizedPatients,
+          outHospital,
+          inHospital,
+          inHospitalDeath,
+          autoOutHospital,
+          icu
+        } = result;
+        this.setState({
+          inHospital: hospitalizedPatients.totalInHospital,
+          death: inHospitalDeath.inHospitalDeath,
+          icu: icu.icu,
 
-            leaveHospital: outHospital.recover,
-            autoLeave: autoOutHospital.outHospitalAuto,
+          leaveHospital: outHospital.recover,
+          autoLeave: autoOutHospital.outHospitalAuto,
 
-            enterHospital: inHospital.admissions
-          });
-        }
+          enterHospital: inHospital.admissions
+        });
       });
   };
 
@@ -183,16 +180,13 @@ class Hospital extends PureComponent {
           endDate
         }
       })
-      .then(res => {
-        const { result } = res;
-        if (result) {
-          const { inOutHospital } = result;
-          this.setState({
-            listIn: inOutHospital.totalInHospital,
-            listEnter: inOutHospital.admissions,
-            listLeave: inOutHospital.recover
-          });
-        }
+      .then(result => {
+        const { inOutHospital } = result;
+        this.setState({
+          listIn: inOutHospital.totalInHospital,
+          listEnter: inOutHospital.admissions,
+          listLeave: inOutHospital.recover
+        });
       });
   };
 
