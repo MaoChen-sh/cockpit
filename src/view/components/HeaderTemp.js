@@ -65,10 +65,14 @@ const Content = styled.div`
 `;
 class HeaderTemp extends PureComponent {
   render() {
-    const { small, title, count, subList } = this.props;
+    const { small, title, count, subList, defaultStyles } = this.props;
     if (small) {
       return (
-        <Header defaultStyles={`margin-top: -66px; padding-top: 66px;`}>
+        <Header
+          defaultStyles={
+            `margin-top: -66px; padding-top: 66px;` + defaultStyles
+          }
+        >
           <Content>
             <h3>{title}</h3>
             <p>{count}</p>
@@ -77,7 +81,7 @@ class HeaderTemp extends PureComponent {
       );
     }
     return (
-      <Header>
+      <Header defaultStyles={defaultStyles}>
         <ContentBig>
           <h3>{title}</h3>
           <p>{count}</p>
@@ -97,6 +101,7 @@ class HeaderTemp extends PureComponent {
 
 HeaderTemp.propTypes = {
   small: PropTypes.bool,
+  defaultStyles: PropTypes.string,
   title: PropTypes.string,
   count: PropTypes.node,
   subList: PropTypes.array

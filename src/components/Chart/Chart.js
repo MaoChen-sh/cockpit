@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import echarts from "echarts/lib/echarts";
-
+import "zrender/lib/svg/svg";
 require("echarts/lib/component/dataset");
 require("echarts/lib/chart/line");
 require("echarts/lib/chart/pie");
@@ -39,11 +39,13 @@ class Chart extends Component {
     this.draw();
   }
   draw = () => {
-    const { getOptions, data } = this.props;
+    const { getOptions, data, svg } = this.props;
     if (!getOptions) {
       return;
     }
-    const chart = echarts.init(this.chart);
+    const chart = echarts.init(this.chart, null, {
+      renderer: svg ? "svg" : "canvas"
+    });
     const options = getOptions(data);
     chart.setOption({
       ...options,
@@ -62,7 +64,7 @@ class Chart extends Component {
       <Wrap
         defaultStyles={defaultStyles}
         className={className}
-        innerRef={el => (this.chart = el)}
+        ref={el => (this.chart = el)}
       />
     );
   }

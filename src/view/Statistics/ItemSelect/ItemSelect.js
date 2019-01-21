@@ -3,7 +3,6 @@ import styled from "styled-components";
 import {
   LinePointer,
   BlockArea as BlockAreaBase,
-  Calendar,
   RightArrow as RightArrowBase
 } from "components";
 import DatePicker from "./DatePicker";

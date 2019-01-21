@@ -89,7 +89,7 @@ class ScrollTable extends PureComponent {
     return (
       <Wrap>
         <Scroll onScroll={this.onScroll}>
-          <Left shadow={leftShadow} innerRef={el => (this.leftNode = el)}>
+          <Left shadow={leftShadow} ref={el => (this.leftNode = el)}>
             <thead>
               <tr>
                 <Th>{columns[0].title}</Th>
@@ -110,6 +110,9 @@ class ScrollTable extends PureComponent {
   }
 }
 
-ScrollTable.propTypes = {};
+ScrollTable.propTypes = {
+  data: PropTypes.array,
+  columns: PropTypes.array
+};
 
 export default ScrollTable;

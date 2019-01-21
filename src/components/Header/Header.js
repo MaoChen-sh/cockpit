@@ -94,13 +94,13 @@ class Header extends PureComponent {
       <Wrap
         className={className}
         defaultStyles={defaultStyles}
-        innerRef={el => {
+        ref={el => {
           this.wrapNode = el;
         }}
       >
         <ShadowBox />
         <BackGround
-          innerRef={el => (this.bg = el)}
+          ref={el => (this.bg = el)}
           width={canvasW}
           height={canvasH + 10}
         />

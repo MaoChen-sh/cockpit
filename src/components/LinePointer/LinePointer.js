@@ -1,6 +1,6 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import React, { PureComponent } from "react";
+import PropTypes from "prop-types";
+import styled from "styled-components";
 
 const Pointer = styled.div`
   color: #999;
@@ -29,12 +29,13 @@ const Pointer = styled.div`
     display: inline-block;
     padding: 0 10px;
   }
+  ${p => p.defaultStyles}
 `;
 class LinePointer extends PureComponent {
   render() {
-    const {children,defaultStyles, className } = this.props
+    const { children, defaultStyles, className } = this.props;
     return (
-      <Pointer className={className} defaultStyles= {defaultStyles}>
+      <Pointer className={className} defaultStyles={defaultStyles}>
         <span>{children}</span>
       </Pointer>
     );
@@ -43,7 +44,7 @@ class LinePointer extends PureComponent {
 
 LinePointer.propTypes = {
   defaultStyles: PropTypes.string,
-  className: PropTypes.string,
+  className: PropTypes.string
 };
 
 export default LinePointer;

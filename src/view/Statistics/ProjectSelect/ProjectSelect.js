@@ -1,5 +1,4 @@
 import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
 import { TableTemp as TableBase } from "view/components";
 import { Radio, BlockArea, LinePointer } from "components";
 import styled from "styled-components";
@@ -253,6 +252,5 @@ class ProjectSelect extends PureComponent {
   }
 }
 
-ProjectSelect.propTypes = {};
 
 export default ProjectSelect;

@@ -1,10 +1,9 @@
 import React, { PureComponent } from "react";
-import { Chart, BlockArea, RightArrow, Rate as RateBase } from "components";
+import { Chart, BlockArea, RightArrow, Rate } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
 import { TableTemp as Table, HeaderTemp } from "view/components";
 import fakeData from "config/fakeData";
-const Rate = styled(RateBase)``;
 const NavList = styled.ul`
   display: flex;
   justify-content: space-around;

@@ -39,8 +39,8 @@ const staticNavList = [
   {
     svg: special,
     content: "专题",
-    id: "spec",
-    url: "/spec"
+    id: "speproject",
+    url: "/speproject"
   },
   {
     svg: statistics,

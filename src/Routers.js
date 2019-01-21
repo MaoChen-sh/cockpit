@@ -7,6 +7,16 @@ import BodyCheck from "./view/Cockpit/BodyCheck";
 import Hospital from "./view/Cockpit/Hospital";
 import Income from "./view/Cockpit/Income";
 
+import SpeProject from "./view/SpeProject";
+import SpeTech from "./view/SpeProject/Tech";
+import SpeTechProject from "./view/SpeProject/Tech/Project";
+import SpeReserve from "./view/SpeProject/Reserve";
+import SpeReserveList from "./view/SpeProject/Reserve/List";
+import SpePrescription from "./view/SpeProject/Prescription";
+import SpeBed from "./view/SpeProject/Bed";
+import SpeBedDetail from "./view/SpeProject/Bed/Detail";
+import SpeSufferer from "./view/SpeProject/Sufferer";
+
 import Nursing from "./view/Nursing";
 import Norms from "./view/Nursing/Norms";
 
@@ -26,6 +36,32 @@ class Routers extends Component {
         <Route path="/cockpit/bodycheck" component={BodyCheck} />
         <Route path="/cockpit/hospital/:type" component={Hospital} />
         <Route path="/cockpit/income/:type" component={Income} />
+
+        <Route exact path="/speproject" component={SpeProject} />
+        <Route exact path="/speproject/tech/:type?" component={SpeTech} />
+        <Route
+          exact
+          path="/speproject/techproject/:project"
+          component={SpeTechProject}
+        />
+        <Route exact path="/speproject/reserve/:type" component={SpeReserve} />
+        <Route
+          exact
+          path="/speproject/reservelist/:dataType/:viewType"
+          component={SpeReserveList}
+        />
+        <Route
+          exact
+          path="/speproject/prescription/:type?"
+          component={SpePrescription}
+        />
+        <Route exact path="/speproject/bed/:type?" component={SpeBed} />
+        <Route exact path="/speproject/beddetail" component={SpeBedDetail} />
+        <Route
+          exact
+          path="/speproject/sufferer/:type?"
+          component={SpeSufferer}
+        />
 
         <Route exact path="/nursing" component={Nursing} />
         <Route path="/nursing/:norm/:childNorm?" component={Norms} />

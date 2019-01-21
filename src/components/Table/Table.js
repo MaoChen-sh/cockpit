@@ -6,7 +6,8 @@ const Main = styled(TableBase)`
   width: 100%;
   thead > tr {
     background: #ddf4ff;
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 12px;
     color: #333333;
     font-weight: bold;
     height: 40px;
@@ -14,7 +15,6 @@ const Main = styled(TableBase)`
     th:first-child {
       padding-left: 20px;
     }
- 
   }
   tbody > tr {
     position: relative;
@@ -26,8 +26,9 @@ const Main = styled(TableBase)`
       border-bottom: none;
     }
   }
-  td,th{
-    i{
+  td,
+  th {
+    i {
       vertical-align: middle;
     }
   }
@@ -37,6 +38,5 @@ class Table extends PureComponent {
     return <Main {...this.props} />;
   }
 }
-
 
 export default Table;

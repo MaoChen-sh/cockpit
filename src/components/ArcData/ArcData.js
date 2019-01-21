@@ -396,7 +396,7 @@ class ArcData extends PureComponent {
     const { canvasH, canvasW } = this.staticSetting;
     return (
       <DataCircle
-        innerRef={this.setRefCtx}
+        ref={this.setRefCtx}
         width={canvasW}
         height={canvasH + 10}
         onClick={this.clickHandle}

@@ -11,7 +11,10 @@ const Table = styled(TableBase)`
      display: none
   }`}
       color: #333;
-
+  th,
+  td {
+    padding: 0 5px;
+  }
   tbody > tr {
     height: 40px;
     font-size: 14px;
@@ -81,6 +84,34 @@ const Select = styled(SelectBase)`
 
 const selectRender = ({ value }) => <div>{value.label}</div>;
 class TableTemp extends PureComponent {
+  state = {
+    sortId: "",
+    sortKey: "",
+    sortUp: true,
+    sortFunc: () => {}
+  };
+  sort = (id, sortKey) => () => {
+    const { sortId: prevSortId, sortUp: prevSortUp } = this.state;
+    if (id === prevSortId) {
+      if (prevSortUp === false) {
+        this.setState({
+          sortUp: true,
+          sortKey: "",
+          sortId: ""
+        });
+      } else {
+        this.setState({
+          sortUp: !prevSortUp
+        });
+      }
+    } else {
+      this.setState({
+        sortKey: sortKey,
+        sortUp: true,
+        sortId: id
+      });
+    }
+  };
   get columns() {
     const { columns, noArrow } = this.props;
     return noArrow
@@ -94,14 +125,20 @@ class TableTemp extends PureComponent {
             id: columns.length
           }
         ].map((ele, index) => {
-          const { title, sort, onSort, options } = ele;
+          const { title, sortKey, options, id } = ele;
           let newTitle = <div>{title}</div>;
-          if (sort) {
+          if (sortKey) {
             newTitle = (
               <div key={index}>
                 <div
-                  className={`list_title--sort ${ele.sort}`}
-                  onClick={onSort}
+                  className={`list_title--sort ${
+                    id === this.state.sortId
+                      ? this.state.sortUp
+                        ? "up"
+                        : "down"
+                      : ""
+                  }`}
+                  onClick={this.sort(id, sortKey)}
                 >
                   {title}
                 </div>
@@ -148,7 +185,8 @@ class TableTemp extends PureComponent {
     if (onClick) onClick(ele, rowIndex);
   };
   render() {
-    const { className, defaultStyles, data, noHeader } = this.props;
+    const { className, defaultStyles, data = [], noHeader } = this.props;
+    const { sortId, sortKey, sortUp } = this.state;
     return (
       <Table
         noHeader={noHeader}
@@ -156,7 +194,13 @@ class TableTemp extends PureComponent {
         className={className}
         defaultStyles={defaultStyles}
         columns={this.columns}
-        data={data}
+        data={
+          sortId
+            ? [...data].sort(
+                (a, b) => (sortUp ? 1 : -1) * (a[sortKey] - b[sortKey])
+              )
+            : data
+        }
       />
     );
   }

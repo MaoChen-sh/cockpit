@@ -33,10 +33,15 @@ const Tab = styled(TabBase)`
 const now = new Date(new Date().toLocaleDateString());
 const endDate = (type => {
   let [year, month, day] = getYMD(now);
+  if (month === 0) {
+    year = year - 1;
+    month = 12;
+  }
   if (day < 2) {
     month = month - 1;
-    if (month === -1) {
+    if (month === 0) {
       year = year - 1;
+      month = 12;
     }
   }
   return new Date(`${year}/${month}/1`);

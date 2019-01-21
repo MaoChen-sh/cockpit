@@ -11,6 +11,7 @@ import Rate from "./Rate";
 import Table from "./Table";
 import LinePointer from "./LinePointer";
 import Radio from "./Radio";
+import User from "./User";
 export {
   BottomNav,
   ArcData,
@@ -24,5 +25,6 @@ export {
   Rate,
   Table,
   LinePointer,
-  Radio
+  Radio,
+  User
 };

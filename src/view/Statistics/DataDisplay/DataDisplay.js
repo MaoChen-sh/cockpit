@@ -1,5 +1,4 @@
 import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
 import ScrollTable from "./ScrollTable";
 import { BlockArea } from "components";
 import { selectedItem } from "context";

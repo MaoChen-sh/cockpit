@@ -177,7 +177,7 @@ class Calendar extends PureComponent {
       year: "选择年份"
     }[type];
     return (
-      <Wrap innerRef={el => (this.wrapNode = el)} onClick={this.onWrapClick}>
+      <Wrap ref={el => (this.wrapNode = el)} onClick={this.onWrapClick}>
         <Title>
           <span onClick={this.cancel}>取消</span>
           <h4>{text}</h4>
