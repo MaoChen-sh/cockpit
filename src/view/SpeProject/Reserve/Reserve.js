@@ -119,15 +119,35 @@ class Reserve extends DateSelectPageTemplate {
         svg: Normal,
         title: "普通号预约人数",
         count: Math.ceil(Math.random() * 300 + 200),
-        to: "/speproject/reservelist/count/normal"
+        to: {
+          pathname: "/speproject/reservelist",
+          state: {
+            dataType: "count",
+            viewType: "normal",
+            type: this.type
+          }
+        }
       },
       {
         svg: Pro,
         title: "专家号预约人数",
         count: Math.ceil(Math.random() * 300 + 200),
-        to: "/speproject/reservelist/count/pro"
+        to: {
+          pathname: "/speproject/reservelist",
+          state: {
+            dataType: "count",
+            viewType: "pro",
+            type: this.type
+          }
+        }
       }
     ];
+    if (this.type !== "day") {
+      return list.map(ele => ({
+        ...ele,
+        rate: Math.random() - 0.5
+      }));
+    }
     return list;
   }
   get content() {
@@ -137,14 +157,32 @@ class Reserve extends DateSelectPageTemplate {
           <NavList list={this.reduceNavItem(this.list)} />
         </BlockArea>
         <BlockArea>
-          <Link to={"/speproject/reservelist/rate/normal"}>
+          <Link
+            to={{
+              pathname: "/speproject/reservelist",
+              state: {
+                dataType: "rate",
+                viewType: "normal",
+                type: this.type
+              }
+            }}
+          >
             <Chart
               svg
               getOptions={this.getNormalChartOption}
               data={this.normalData}
             />
           </Link>
-          <Link to={"/speproject/reservelist/rate/pro"}>
+          <Link
+            to={{
+              pathname: "/speproject/reservelist",
+              state: {
+                dataType: "rate",
+                viewType: "pro",
+                type: this.type
+              }
+            }}
+          >
             <Chart
               svg
               getOptions={this.getProChartOption}
@@ -163,6 +201,11 @@ class Reserve extends DateSelectPageTemplate {
       </>
     );
   }
+  TabList = [
+    { content: "日报", id: "day", to: "/speproject/reserve/day" },
+    { content: "月报", id: "month", to: "/speproject/reserve/month" },
+    { content: "年报", id: "year", to: "/speproject/reserve/year" }
+  ];
 }
 
 export default Reserve;

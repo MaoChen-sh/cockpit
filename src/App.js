@@ -4,9 +4,9 @@ import styled from "styled-components";
 import BottomNav from "components/BottomNav";
 import { ReactComponent as cockpit } from "static/svg/cockpit.svg";
 import { ReactComponent as special } from "static/svg/special.svg";
-import { ReactComponent as statistics } from "static/svg/statistics.svg";
+// import { ReactComponent as statistics } from "static/svg/statistics.svg";
 import { ReactComponent as nursing } from "static/svg/nursing.svg";
-import { ReactComponent as mine } from "static/svg/mine.svg";
+// import { ReactComponent as mine } from "static/svg/mine.svg";
 import { $fetch, apis } from "config";
 const Wrap = styled.div`
   padding-bottom: 48px;
@@ -42,24 +42,24 @@ const staticNavList = [
     id: "speproject",
     url: "/speproject"
   },
-  {
-    svg: statistics,
-    content: "统计",
-    id: "statistics",
-    url: "/statistics"
-  },
+  // {
+  //   svg: statistics,
+  //   content: "统计",
+  //   id: "statistics",
+  //   url: "/statistics"
+  // },
   {
     svg: nursing,
     content: "护理",
     id: "nursing",
     url: "/nursing"
   },
-  {
-    svg: mine,
-    content: "我的",
-    id: "mine",
-    url: "/mine"
-  }
+  // {
+  //   svg: mine,
+  //   content: "我的",
+  //   id: "mine",
+  //   url: "/mine"
+  // }
 ];
 
 class App extends Component {

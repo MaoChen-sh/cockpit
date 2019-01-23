@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { RightArrow } from "components";
+import { RightArrow, Rate } from "components";
 import { withRouter } from "react-router-dom";
 
 const Wrap = styled.div`
@@ -33,13 +33,16 @@ const Item = styled.div`
   & > p {
     font-size: 12px;
     color: #6b6b6b;
-    margin: 10px auto;
+  }
+  & > *:nth-child(n + 2) {
+    margin-top: 10px;
   }
   & > span {
     display: flex;
     align-items: center;
     line-height: 14px;
     font-weight: bold;
+
     i {
       margin-left: 6px;
     }
@@ -56,11 +59,13 @@ class LinkList extends PureComponent {
     return (
       <Wrap className={className} defaultStyles={defaultStyles}>
         {list.map((ele, index) => {
-          const { to = "", svg: Svg, content, value } = ele;
+          const { to = "", svg: Svg, content, value, rate } = ele;
           return (
             <Item onClick={this.linkTo(to)} key={index}>
               <Svg />
               <p>{content}</p>
+              {rate && <Rate value={rate} />}
+
               <span>
                 {value}
                 {to && <RightArrow />}

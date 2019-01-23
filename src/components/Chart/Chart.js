@@ -6,8 +6,13 @@ import "zrender/lib/svg/svg";
 require("echarts/lib/component/dataset");
 require("echarts/lib/chart/line");
 require("echarts/lib/chart/pie");
+require("echarts/lib/chart/effectScatter");
 require("echarts/lib/component/tooltip");
 require("echarts/lib/component/title");
+require("echarts/lib/chart/map");
+require("echarts/lib/component/geo");
+require("echarts/lib/component/visualMap");
+
 const Wrap = styled.div`
   display: inline-block;
   height: 200px;

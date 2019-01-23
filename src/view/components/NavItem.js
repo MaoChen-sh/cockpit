@@ -92,7 +92,10 @@ class NavItem extends PureComponent {
 }
 
 NavItem.propTypes = {
-  svg: PropTypes.func,
+  svg:  PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({render: PropTypes.func.isRequired}),
+  ]),
   title: PropTypes.string,
   count: PropTypes.number,
   rate: PropTypes.number,

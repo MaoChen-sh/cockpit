@@ -3,14 +3,15 @@ import { Chart, BlockArea, RightArrow, Rate } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
 import { HeaderTemp } from "view/components";
+import { Link } from "react-router-dom";
 
 const NavList = styled.ul`
   display: flex;
   justify-content: space-around;
   & > li {
-    width: 33%;
+    width: 50%;
     text-align: center;
-    & > * {
+    & > a > * {
       padding-top: 5px;
       padding-bottom: 5px;
       &:first-child {
@@ -81,7 +82,7 @@ class BodyCheck extends PureComponent {
       location: { search }
     } = props;
     this.get_data(...search.match(/\d+.\d+.\d+/g));
-
+    this.type = search.match(/type=(\w+)/)[1];
     this.state = {
       total: "", // 总数
       teamCount: "", // 团队数
@@ -121,13 +122,19 @@ class BodyCheck extends PureComponent {
         title: "团队体检人数",
         count: teamCount,
         rate: teamRate,
-        to: "/cockpit/outpatient"
+        to: {
+          pathname: "/cockpit/bodycheck/countdetail",
+          state: { type: "team" }
+        }
       },
       {
         title: "散客体检人数",
         count: singleCount,
         rate: singleRate,
-        to: "/cockpit/surgery"
+        to: {
+          pathname: "/cockpit/bodycheck/countdetail",
+          state: { type: "single" }
+        }
       }
     ];
   }
@@ -158,6 +165,7 @@ class BodyCheck extends PureComponent {
       value: ele.count,
       name: ele.title
     }));
+    console.log(this.dataList, this.type);
     return (
       <div>
         <HeaderTemp small title={"体检人数"} count={total} />
@@ -165,31 +173,35 @@ class BodyCheck extends PureComponent {
           <NavList>
             {this.dataList.map((ele, index) => (
               <li key={index}>
-                <h4>{ele.title}</h4>
-                {this.type !== "day" && <Rate value={ele.rate} />}
-                <p>
-                  <span>{ele.count}</span>
-                  <RightArrow />
-                </p>
+                <Link to={ele.to}>
+                  <h4>{ele.title}</h4>
+                  {this.type !== "day" && <Rate value={ele.rate || null} />}
+                  <p>
+                    <span>{ele.count}</span>
+                    <RightArrow />
+                  </p>
+                </Link>
               </li>
             ))}
           </NavList>
         </BlockArea>
-        <BlockArea title={"不同类型体检人数占比"}>
-          <Chart
-            defaultStyles={`height: 120px;`}
-            data={canvasData}
-            getOptions={this.getOptions}
-          />
-          <Legend>
-            {canvasData.map((ele, index) => (
-              <LegendItem key={index} color={colors[index]}>
-                <span>{ele.name}</span>
-                <span>{ele.value}</span>
-              </LegendItem>
-            ))}
-          </Legend>
-        </BlockArea>
+        <Link to={"/cockpit/bodycheck/ratedetail"}>
+          <BlockArea title={"不同类型体检人数占比"}>
+            <Chart
+              defaultStyles={`height: 120px;`}
+              data={canvasData}
+              getOptions={this.getOptions}
+            />
+            <Legend>
+              {canvasData.map((ele, index) => (
+                <LegendItem key={index} color={colors[index]}>
+                  <span>{ele.name}</span>
+                  <span>{ele.value}</span>
+                </LegendItem>
+              ))}
+            </Legend>
+          </BlockArea>
+        </Link>
       </div>
     );
   }

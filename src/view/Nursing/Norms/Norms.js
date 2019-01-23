@@ -4,6 +4,7 @@ import { ArcDatePicker, TableTemp as Table } from "view/components";
 import normsData from "./normsData";
 import { Header, Tab as TabBase, BlockArea, Calendar, Rate } from "components";
 import { getYMD } from "tools";
+import { ReactComponent as CalendarIconBase } from "static/svg/calendar.svg";
 
 const CalendarView = styled.div`
   position: absolute;
@@ -14,6 +15,15 @@ const CalendarView = styled.div`
   z-index: 4;
   display: inline-block;
   font-size: 14px;
+`;
+const CalendarIcon = styled(CalendarIconBase)`
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  vertical-align: text-bottom;
+  path {
+    fill: #fff;
+  }
 `;
 const Tab = styled(TabBase)`
   padding: 14px 3.2vw;
@@ -33,6 +43,7 @@ const Tab = styled(TabBase)`
 const now = new Date(new Date().toLocaleDateString());
 const endDate = (type => {
   let [year, month, day] = getYMD(now);
+  month = month - 1;
   if (month === 0) {
     year = year - 1;
     month = 12;
@@ -128,7 +139,7 @@ class Norms extends PureComponent {
         )}
         <Header defaultStyles={`margin-top: -66px;`}>
           <CalendarView onClick={this.showCalendar}>
-            {this.dateStr}
+            {this.dateStr}<CalendarIcon />
           </CalendarView>
           <ArcDatePicker
             onChange={onDateChange}

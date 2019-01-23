@@ -1,10 +1,41 @@
 import React, { PureComponent } from "react";
-import { Chart as ChartBase, BlockArea, Rate } from "components";
+import { Chart as ChartBase, BlockArea, Rate, RightArrow } from "components";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import echarts from "echarts/lib/echarts";
 import { $fetch, apis } from "config";
 import { getYMD } from "tools";
 import { HeaderTemp, TableTemp as Table } from "view/components";
+const AreaTitle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  i {
+    margin-left: 10px;
+  }
+`;
+const Area = styled.div`
+  display: flex;
+`;
+const AreaItem = styled.div`
+  width: 50%;
+  border-right: 1px dashed #c6c6c6;
+
+  &:last-child {
+    border: none;
+  }
+  h6 {
+    font-size: 12px;
+    color: #6b6b6b;
+    text-align: center;
+  }
+  p {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+  }
+`;
 const Chart = styled(ChartBase)`
   height: 150px;
 `;
@@ -21,9 +52,7 @@ class Outpatient extends PureComponent {
       outpatient: 0, //门急诊量
       emergency: 0, // 急诊量
       outpatientData: [], // 时段数据
-      distributionList: [], // 部门分布列表
-      countListSort: "down", // 列表按数据排序分布
-      rateListSort: "none" // 列表按环比排序分布
+      distributionList: [] // 部门分布列表
     };
   }
   get beginDate() {
@@ -50,7 +79,6 @@ class Outpatient extends PureComponent {
   }
 
   get columns() {
-    const { countListSort, rateListSort } = this.state;
     if (this.type === "day") {
       return [
         {
@@ -60,8 +88,7 @@ class Outpatient extends PureComponent {
         },
         {
           title: "门诊人次",
-          sort: countListSort,
-          onSort: this.onCountListSort,
+          sortKey: "value",
           render: ele => ele.value,
           id: 1
         }
@@ -75,39 +102,31 @@ class Outpatient extends PureComponent {
       },
       {
         title: "环比数据",
-        sort: rateListSort,
-        onSort: this.onRateListSort,
+        sortKey: "rate",
         render: ele => <Rate value={ele.rate} />,
         id: 1
       },
       {
         title: "门诊人次",
-        sort: countListSort,
-        onSort: this.onCountListSort,
+        sortKey: "value",
         render: ele => ele.value,
         id: 2
       }
     ];
   }
   get listData() {
-    const { distributionList, countListSort, rateListSort } = this.state;
+    const { distributionList } = this.state;
     const dataArr = distributionList.map((ele, index) => ({
       name: ele.departmentName,
       value: ele.outpatientEmergencyRegistration,
       rate: ele.ringRate,
-      to: "/",
+      to: {
+        pathname: "/cockpit/outpatient/detail",
+        state: { title: ele.departmentName }
+      },
       id: index
     }));
-    if (countListSort !== "none") {
-      return dataArr.sort(
-        (a, b) => (countListSort === "down" ? -1 : 1) * (a.value - b.value)
-      );
-    }
-    if (rateListSort !== "none") {
-      return dataArr.sort(
-        (a, b) => (rateListSort === "down" ? -1 : 1) * (a.rate - b.rate)
-      );
-    }
+
     return dataArr;
   }
   get_data = (...args) => {
@@ -154,18 +173,6 @@ class Outpatient extends PureComponent {
       .catch(err => console.error(err));
   };
 
-  onCountListSort = () => {
-    this.setState({
-      countListSort: this.state.countListSort === "down" ? "up" : "down",
-      rateListSort: "none"
-    });
-  };
-  onRateListSort = () => {
-    this.setState({
-      countListSort: "none",
-      rateListSort: this.state.rateListSort === "down" ? "up" : "down"
-    });
-  };
   getOptions = data => {
     return {
       tooltip: {
@@ -281,6 +288,12 @@ class Outpatient extends PureComponent {
       ]
     };
   };
+  gotoTimeDetail = e => {
+    if (e.target.tagName.toUpperCase() === "CANVAS") {
+      return;
+    }
+    this.props.history.push("/cockpit/outpatient/timedetail");
+  };
   render() {
     const { total, outpatient, emergency } = this.state;
     return (
@@ -300,11 +313,40 @@ class Outpatient extends PureComponent {
           ]}
         />
         <BlockArea
+          onClick={this.gotoTimeDetail}
           title={"不同时段门急诊人次"}
           defaultStyles={`padding: 14px 0`}
         >
           <Chart getOptions={this.getOptions} data={this.chartData} />
         </BlockArea>
+        <Link to={"/cockpit/map"}>
+          <BlockArea
+            title={
+              <AreaTitle>
+                不同科室门急诊人次 <RightArrow />
+              </AreaTitle>
+            }
+          >
+            <Area>
+              {[
+                {
+                  title: "范围内门急诊人次",
+                  count: Math.ceil(Math.random() * 300 + 200)
+                },
+                {
+                  title: "范围外门急诊人次",
+                  count: Math.ceil(Math.random() * 300 + 200)
+                }
+              ].map((ele, index) => (
+                <AreaItem key={index}>
+                  <h6>{ele.title}</h6>
+                  <p>{ele.count}</p>
+                </AreaItem>
+              ))}
+            </Area>
+          </BlockArea>
+        </Link>
+
         <BlockArea title={"不同科室门急诊人次"}>
           <Table data={this.listData} columns={this.columns} />
         </BlockArea>

@@ -12,8 +12,6 @@ class Hospital extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      countListSort: "down", // 列表按数据排序分布
-      rateListSort: "none", // 列表按环比排序分布
       dataType: "area",
       inHospital: 0, // 在院人数
       death: 0, // 在院死亡人数
@@ -27,6 +25,12 @@ class Hospital extends PureComponent {
       enterHospital: 0, // 入院人数
       listEnter: [] // 入院人数列表
     };
+    const {
+      location: { search }
+    } = this.props;
+    this.type = search.match(/type=(\w+)/)[1];
+    this.beginDate = search.match(/beginDate=([\d-]+)/)[1];
+    this.endDate = search.match(/endDate=([\d-]+)/)[1];
   }
   get TYPE() {
     const {
@@ -45,27 +49,8 @@ class Hospital extends PureComponent {
         );
     }
   }
-  get type() {
-    const {
-      location: { search }
-    } = this.props;
-    return search.match(/type=(\w+)/)[1];
-  }
-  get beginDate() {
-    const {
-      location: { search }
-    } = this.props;
-    return search.match(/beginDate=([\d-]+)/)[1];
-  }
-  get endDate() {
-    const {
-      location: { search }
-    } = this.props;
-    return search.match(/endDate=([\d-]+)/)[1];
-  }
 
   get columns() {
-    const { countListSort, rateListSort } = this.state;
     if (this.type === "day") {
       return [
         {
@@ -77,8 +62,7 @@ class Hospital extends PureComponent {
         },
         {
           title: "人数",
-          sort: countListSort,
-          onSort: this.onCountListSort,
+          sortKey: "value",
           render: ele => ele.value,
           id: 1
         }
@@ -94,15 +78,13 @@ class Hospital extends PureComponent {
       },
       {
         title: "环比数据",
-        sort: rateListSort,
-        onSort: this.onRateListSort,
+        sortKey: "rate",
         render: ele => <Rate value={ele.rate} />,
         id: 1
       },
       {
         title: "人数",
-        sort: countListSort,
-        onSort: this.onCountListSort,
+        sortKey: "value",
         render: ele => ele.value,
         id: 2
       }
@@ -110,21 +92,18 @@ class Hospital extends PureComponent {
   }
 
   get listData() {
-    const { countListSort, dataType, rateListSort } = this.state;
-    const dataArr = fakeData[dataType].map(ele => ({
+    const { dataType } = this.state;
+    const {
+      params: { type }
+    } = this.props.match;
+    const dataArr = fakeData[dataType].map((ele, index) => ({
       ...ele,
-      to: "/"
+      to: {
+        pathname: "/cockpit/hospital/" + type + "/detail",
+        state: { dataType, name: ele.name }
+      },
+      id: index
     }));
-    if (countListSort !== "none") {
-      return dataArr.sort(
-        (a, b) => (countListSort === "down" ? -1 : 1) * (a.value - b.value)
-      );
-    }
-    if (rateListSort !== "none") {
-      return dataArr.sort(
-        (a, b) => (rateListSort === "down" ? -1 : 1) * (a.rate - b.rate)
-      );
-    }
     return dataArr;
   }
 
@@ -190,18 +169,6 @@ class Hospital extends PureComponent {
       });
   };
 
-  onCountListSort = () => {
-    this.setState({
-      countListSort: this.state.countListSort === "down" ? "up" : "down",
-      rateListSort: "none"
-    });
-  };
-  onRateListSort = () => {
-    this.setState({
-      countListSort: "none",
-      rateListSort: this.state.rateListSort === "down" ? "up" : "down"
-    });
-  };
   onOptionChange = val => {
     this.setState({
       dataType: val === "科室" ? "class" : "area"

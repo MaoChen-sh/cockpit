@@ -4,7 +4,10 @@ import { TableTemp as Table } from "view/components";
 import styled from "styled-components";
 import { DateSelectPageTemplate } from "view/Template";
 import fakeData from "config/fakeData";
-
+import { ReactComponent as Approved } from "static/svg/approved.svg";
+import { ReactComponent as Occupied } from "static/svg/occupied.svg";
+const a = styled.div``;
+console.log(a);
 const NavList = styled(ListBase)`
   & > li {
     display: flex;
@@ -29,7 +32,7 @@ class Bed extends DateSelectPageTemplate {
         {
           title: "床位使用率",
           sortKey: "value2",
-          render: ele => ele.value,
+          render: ele => (ele.value2 * 100).toFixed(2) + "%",
           id: 2
         }
       ];
@@ -74,15 +77,22 @@ class Bed extends DateSelectPageTemplate {
       <>
         <BlockArea title={"床位使用率"} count={"88%"}>
           <NavList
-            list={this.reduceNavItem(
-              Array(2).fill({
-                svg: () => 1,
-                title: "超声",
+            list={this.reduceNavItem([
+              {
+                svg: Approved,
+                noLink: true,
+                title: "病人占用床位数",
                 count: 352,
-                rate: null,
-                to: "/cockpit/outpatient"
-              })
-            )}
+                rate: this.type === "day" ? null : Math.random() - 0.5
+              },
+              {
+                svg: Occupied,
+                noLink: true,
+                title: "核定床位",
+                count: 800,
+                rate: this.type === "day" ? null : Math.random() - 0.5
+              }
+            ])}
           />
         </BlockArea>
 
@@ -98,6 +108,11 @@ class Bed extends DateSelectPageTemplate {
       </>
     );
   }
+  TabList = [
+    { content: "日报", id: "day", to: "/speproject/bed/day" },
+    { content: "月报", id: "month", to: "/speproject/bed/month" },
+    { content: "年报", id: "year", to: "/speproject/bed/year" }
+  ];
 }
 
 export default Bed;

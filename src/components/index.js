@@ -7,6 +7,7 @@ import List from "./List";
 import RightArrow from "./RightArrow";
 import Chart from "./Chart";
 import Calendar from "./Calendar";
+import CompanySelector from "./CompanySelector";
 import Rate from "./Rate";
 import Table from "./Table";
 import LinePointer from "./LinePointer";
@@ -22,6 +23,7 @@ export {
   RightArrow,
   Chart,
   Calendar,
+  CompanySelector,
   Rate,
   Table,
   LinePointer,

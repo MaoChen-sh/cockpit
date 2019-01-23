@@ -5,4 +5,12 @@ import HeaderTemp from "./HeaderTemp";
 import TableTemp from "./TableTemp";
 import LinkList from "./LinkList";
 import PersonCard from "./PersonCard";
-export { NavItem, ArcDatePicker, ListTemp, HeaderTemp, TableTemp, LinkList, PersonCard };
+export {
+  NavItem,
+  ArcDatePicker,
+  ListTemp,
+  HeaderTemp,
+  TableTemp,
+  LinkList,
+  PersonCard
+};

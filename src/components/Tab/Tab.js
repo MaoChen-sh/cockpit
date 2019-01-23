@@ -22,6 +22,7 @@ const Item = styled.li`
   ${p =>
     p.active &&
     `
+    opacity: 1;
     background: #fff;
     color: #333;
     `};

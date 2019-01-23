@@ -24,12 +24,13 @@ const Arrow = styled.i`
 
 class RightArrow extends PureComponent {
   render() {
-    const { shadow = true, defaultStyles, className } = this.props;
+    const { shadow = true, defaultStyles, className, onClick } = this.props;
     return (
       <Arrow
         shadow={shadow}
         defaultStyles={defaultStyles}
         className={className}
+        onClick={onClick}
       />
     );
   }
@@ -38,7 +39,8 @@ class RightArrow extends PureComponent {
 RightArrow.propTypes = {
   className: PropTypes.string,
   defaultStyles: PropTypes.string,
-  shadow: PropTypes.bool
+  shadow: PropTypes.bool,
+  onClick: PropTypes.func
 };
 
 export default RightArrow;

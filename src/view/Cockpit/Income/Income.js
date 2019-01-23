@@ -9,44 +9,44 @@ const oneDay = 24 * 3600 * 1000;
 
 const fakeData = [
   {
-    name: "妇产科",
+    name: "妇产科"
   },
   {
-    name: "消化内科",
+    name: "消化内科"
   },
   {
-    name: "耳鼻喉科",
+    name: "耳鼻喉科"
   },
   {
-    name: "神经外科",
+    name: "神经外科"
   },
   {
-    name: "骨科",
+    name: "骨科"
   },
   {
-    name: "肿瘤科",
+    name: "肿瘤科"
   },
   {
-    name: "产科",
+    name: "产科"
   },
   {
-    name: "肝脏移植科",
+    name: "肝脏移植科"
   },
   {
-    name: "血液科",
+    name: "血液科"
   }
-].map(ele=>({...ele, 
-  value: parseInt(Math.random()*100000),
-  rate: Math.random()-0.5
+].map(ele => ({
+  ...ele,
+  value: parseInt(Math.random() * 100000),
+  rate: Math.random() - 0.5
 }));
-const fakeChartData = Array(31).fill('').map(ele=> parseInt(Math.random()*1000000))
+const fakeChartData = Array(31)
+  .fill("")
+  .map(ele => parseInt(Math.random() * 1000000));
 class Income extends PureComponent {
   constructor(props) {
     super(props);
-    this.state = {
-      countListSort: "down", // 列表按数据排序分布
-      rateListSort: "none" // 列表按环比排序分布
-    };
+    this.state = {};
   }
   strObj = {
     total: "医疗总收入",
@@ -74,7 +74,6 @@ class Income extends PureComponent {
     return search.match(/endDate=([\d-]+)/)[1];
   }
   get columns() {
-    const { countListSort, rateListSort } = this.state;
     const {
       match: {
         params: { type }
@@ -90,9 +89,9 @@ class Income extends PureComponent {
         },
         {
           title: str,
-          sort: countListSort,
-          onSort: this.onCountListSort,
-          render: ele => ele.value,
+          className: "text-right",
+          sortKey: "value",
+          render: ele => getMoney(ele.value),
           id: 1
         }
       ];
@@ -105,57 +104,41 @@ class Income extends PureComponent {
       },
       {
         title: "环比数据",
-        sort: rateListSort,
-        onSort: this.onRateListSort,
+        sortKey: "rate",
         render: ele => <Rate value={ele.rate} />,
         id: 1
       },
       {
         title: str,
-        sort: countListSort,
-        onSort: this.onCountListSort,
-        render: ele => ele.value,
+        className: "text-right",
+        sortKey: "value",
+        render: ele => getMoney(ele.value),
         id: 2
       }
     ];
   }
   get listData() {
-    const { countListSort, rateListSort } = this.state;
     const dataArr = fakeData;
-    if (countListSort !== "none") {
-      return dataArr
-        .sort(
-          (a, b) => (countListSort === "down" ? -1 : 1) * (a.value - b.value)
-        )
-        .map(ele => ({
-          ...ele,
-          value: getMoney(ele.value),
-          to: "/"
-        }));
-    }
-    if (rateListSort !== "none") {
-      return dataArr
-        .sort((a, b) => (rateListSort === "down" ? -1 : 1) * (a.rate - b.rate))
-        .map(ele => ({
-          ...ele,
-          value: getMoney(ele.value),
-          to: "/"
-        }));
-    }
-    return dataArr.map(ele => ({
+    const {
+      match: {
+        params: { type }
+      }
+    } = this.props;
+    return dataArr.map((ele, index) => ({
       ...ele,
-      value: getMoney(ele.value),
-      to: "/"
+      value: ele.value,
+      to: {
+        pathname: "/cockpit/income/" + type + "/detail",
+        state: {
+          name: ele.name
+        }
+      },
+      id: index
     }));
   }
   get chartData() {
     return fakeChartData;
   }
-  onCountListSort = () => {
-    this.setState({
-      countListUp: !this.state.countListUp
-    });
-  };
 
   getOptions = data => {
     return {
@@ -168,9 +151,11 @@ class Income extends PureComponent {
           }
         },
         backgroundColor: "#FF931E",
-        formatter: params=>{
-          const  {axisValue, value}=  params[0]
-        return `${getMoney(value)}<br /><span style='font-size: 9px'>${axisValue}</span>`
+        formatter: params => {
+          const { axisValue, value } = params[0];
+          return `${getMoney(
+            value
+          )}<br /><span style='font-size: 9px'>${axisValue}</span>`;
         },
         textStyle: {
           fontSize: 10
@@ -202,7 +187,7 @@ class Income extends PureComponent {
           interval: this.type === "day" ? 0 : data.length - 2,
           margin: 4,
           color: "#666",
-          fontSize: 10,
+          fontSize: 10
         }
       },
       yAxis: {
@@ -223,7 +208,7 @@ class Income extends PureComponent {
           margin: 4,
           color: "#666",
           fontSize: 10,
-          formatter: value=> parseInt(value/10000)+'w'
+          formatter: value => parseInt(value / 10000) + "w"
         }
       },
       series: [
@@ -271,19 +256,7 @@ class Income extends PureComponent {
       ]
     };
   };
-  
-  onCountListSort = () => {
-    this.setState({
-      countListSort: this.state.countListSort === "down" ? "up" : "down",
-      rateListSort: "none"
-    });
-  };
-  onRateListSort = () => {
-    this.setState({
-      countListSort: "none",
-      rateListSort: this.state.rateListSort === "down" ? "up" : "down"
-    });
-  };
+
   render() {
     const {
       match: {

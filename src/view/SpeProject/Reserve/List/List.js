@@ -1,14 +1,16 @@
 import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
 import { HeaderTemp, TableTemp as Table } from "view/components";
-import { BlockArea } from "components";
+import { BlockArea, Rate } from "components";
 import fakeData from "config/fakeData";
 class List extends PureComponent {
   get isRate() {
-    return this.props.match.params.dataType === "rate";
+    return this.props.location.state.dataType === "rate";
   }
   get isPro() {
-    return this.props.match.params.viewType === "pro";
+    return this.props.location.state.viewType === "pro";
+  }
+  get isDay() {
+    return this.props.location.state.type === "day";
   }
   columns = [
     {
@@ -16,22 +18,34 @@ class List extends PureComponent {
       render: ele => ele.name,
       id: 0
     },
+    ...(this.isDay
+      ? []
+      : [
+          {
+            title: "环比数据",
+            sortKey: "rate",
+            render: ele => <Rate value={ele.rate} />,
+            id: 1
+          }
+        ]),
     this.isRate
       ? {
           title: "预约就诊率",
-          render: ele => ele.rate,
-          id: 1
+          sortKey: "rate1",
+          render: ele => ele.rate1,
+          id: 2
         }
       : {
           title: "预约人数",
+          sortKey: "value",
           render: ele => ele.value,
-          id: 1
+          id: 2
         }
   ];
   get listData() {
     return fakeData["class"].map((ele, index) => ({
       ...ele,
-      rate: ((ele.rate + 0.5) * 100).toFixed(2) + "%",
+      rate1: ((ele.rate + 0.5) * 100).toFixed(2) + "%",
       id: index
     }));
   }
@@ -56,7 +70,5 @@ class List extends PureComponent {
     );
   }
 }
-
-List.propTypes = {};
 
 export default List;

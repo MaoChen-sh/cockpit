@@ -3,7 +3,7 @@ import { HeaderTemp, TableTemp as Table } from "view/components";
 import { BlockArea, User } from "components";
 const fakeData = Array(5)
   .fill("")
-  .map(ele => ({
+  .map(() => ({
     user: {
       isMale: Math.random() > 0.5,
       name: "周熙",
@@ -51,8 +51,9 @@ class Project extends PureComponent {
     }));
     return dataArr;
   }
+ 
   render() {
-    const project = projectNameObj[this.props.match.params.project];
+    const project = projectNameObj[this.props.location.state.project];
     return (
       <div>
         <HeaderTemp

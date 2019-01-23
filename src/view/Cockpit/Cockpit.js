@@ -1,20 +1,12 @@
-import React, { Component } from "react";
+import React from "react";
 import {
-  Header,
-  Tab,
   BlockArea as BlockAreaBase,
   List as ListBase,
   Chart as ChartBase,
-  RightArrow,
-  Calendar,
   Rate,
-  LinePointer
+  RightArrow
 } from "components";
-import {
-  NavItem,
-  ArcDatePicker,
-  TableTemp as TableBase
-} from "view/components";
+import { TableTemp as TableBase } from "view/components";
 import styled from "styled-components";
 import { ReactComponent as outpatient_and_emerg } from "static/svg/outpatient_and_emerg.svg";
 import { ReactComponent as operation } from "static/svg/operation.svg";
@@ -23,18 +15,8 @@ import { ReactComponent as admission_number } from "static/svg/admission_number.
 import { ReactComponent as in_the_hospital } from "static/svg/in_the_hospital.svg";
 import { ReactComponent as discharge_number } from "static/svg/discharge_number.svg";
 import { $fetch, apis } from "config";
-import { getDateParamsFromDate, getYMD } from "tools";
-
-const CalendarView = styled.div`
-  position: absolute;
-  top: 67px;
-  left: 50%;
-  transform: translate(-50%);
-  color: #fff;
-  z-index: 4;
-  display: inline-block;
-  font-size: 14px;
-`;
+import { getDateParamsFromDate, getMoney } from "tools";
+import { DateSelectPageTemplate } from "view/Template";
 
 const NavList = styled(ListBase)`
   & > li {
@@ -74,7 +56,6 @@ const IncomeRight = styled.div`
     font-weight: bold;
   }
 `;
-
 const BlockArea = styled(BlockAreaBase)`
   & > h2 {
     color: #4a4a4a;
@@ -88,38 +69,11 @@ const Table = styled(TableBase)`
     padding-right: 0;
   }
 `;
-const now = new Date(new Date().toLocaleDateString());
-const endDateObj = (type => {
-  let [year, month, day] = getYMD(now);
-  month = month - 1;
-  if (month === 0) {
-    year = year - 1;
-    month = 12;
-  }
-  if (day < 2) {
-    month = month - 1;
-    if (month === 0) {
-      year = year - 1;
-      month = 12;
-    }
-  }
-  return {
-    year: new Date(`${year - 1}/1/1`),
-    month: new Date(`${year}/${month}/1`),
-    day: new Date(now - 24 * 3600000)
-  };
-})();
-
-class Cockpit extends Component {
+class Cockpit extends DateSelectPageTemplate {
   constructor(props) {
     super(props);
-    const {
-      match: {
-        params: { type }
-      }
-    } = props;
     this.state = {
-      currentDate: endDateObj[type],
+      ...this.state,
       counts: {
         outpatientVolume: {},
         surgery: {},
@@ -134,8 +88,7 @@ class Cockpit extends Component {
         unInHospital: {},
         drug: {},
         nonDrug: {}
-      },
-      calenderView: false
+      }
     };
   }
 
@@ -145,11 +98,7 @@ class Cockpit extends Component {
   }
 
   get_data = date => {
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
+    const { type } = this;
     const params = getDateParamsFromDate(date, type);
     Promise.all([this.get_overall(params), this.get_income(params)])
       .then(res =>
@@ -241,69 +190,9 @@ class Cockpit extends Component {
       };
     });
   };
-
-  onDateChange = date => {
+  onDateChangeCall = date => {
     this.get_data(date);
-    this.setState({
-      currentDate: date,
-      calenderView: false
-    });
   };
-
-  reduceNavItem = list => {
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
-    return list.reduce((total, ele, index) => {
-      if (index % 2) {
-        total[total.length - 1] = {
-          content: [
-            ...total[total.length - 1].content,
-            <NavItem key={0} {...ele} noLink={type === "year"} />
-          ]
-        };
-        return total;
-      }
-      return [
-        ...total,
-        {
-          content: [<NavItem key={1} {...ele} noLink={type === "year"} />]
-        }
-      ];
-    }, []);
-  };
-
-  showCalendar = () => {
-    this.setState({
-      calenderView: true
-    });
-  };
-
-  hideCalendar = () => {
-    this.setState({
-      calenderView: false
-    });
-  };
-
-  getDateStr = date => {
-    const [y, m, d] = getYMD(date);
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
-    switch (type) {
-      case "year":
-        return `${y}年`;
-      case "month":
-        return `${y}年${m}月`;
-      default:
-        return `${y}年${m}月${d}日`;
-    }
-  };
-
   get hospitalChartData() {
     const {
       inCome: { inHospital, unInHospital }
@@ -360,9 +249,13 @@ class Cockpit extends Component {
     typeof this.animationEndCallBack === "function" &&
       this.animationEndCallBack();
   };
-
-  render() {
-    const { props, state, onDateChange, reduceNavItem } = this;
+  TabList = [
+    { content: "日报", id: "day", to: "/cockpit/home/day" },
+    { content: "月报", id: "month", to: "/cockpit/home/month" },
+    { content: "年报", id: "year", to: "/cockpit/home/year" }
+  ];
+  get content() {
+    const { state, reduceNavItem } = this;
     const {
       currentDate,
       counts: {
@@ -373,15 +266,9 @@ class Cockpit extends Component {
         admissions,
         recover
       },
-      inCome: { total, inHospital, unInHospital, drug, nonDrug },
-      calenderView,
-      onAnimationEndCallBack
+      inCome: { total, inHospital, unInHospital, drug, nonDrug }
     } = state;
-    const {
-      match: {
-        params: { type }
-      }
-    } = props;
+    const { type } = this;
     const params = getDateParamsFromDate(currentDate, type);
     const searchs =
       Object.entries(params)
@@ -390,38 +277,7 @@ class Cockpit extends Component {
       "&type=" +
       type;
     return (
-      <div>
-        {calenderView && (
-          <Calendar
-            onChange={this.onDateChange}
-            onCancel={this.hideCalendar}
-            maxDate={endDateObj[type]}
-            defaultValue={currentDate}
-            type={type}
-          />
-        )}
-        <Header>
-          <Tab
-            activeId={type}
-            list={[
-              { content: "日报", id: "day", to: "/cockpit/home/day" },
-              { content: "月报", id: "month", to: "/cockpit/home/month" },
-              { content: "年报", id: "year", to: "/cockpit/home/year" }
-            ]}
-          />
-          <CalendarView onClick={this.showCalendar}>
-            {this.getDateStr(currentDate)}
-          </CalendarView>
-
-          <ArcDatePicker
-            onAnimationEndCallBack={onAnimationEndCallBack}
-            onChange={onDateChange}
-            date={currentDate}
-            endDate={endDateObj[type]}
-            type={type}
-          />
-        </Header>
-
+      <>
         <BlockArea title={"重点业务分析"}>
           <NavList
             list={reduceNavItem(
@@ -529,6 +385,7 @@ class Cockpit extends Component {
               }
             ].map(ele => ({
               ...ele,
+              money: ele.money && getMoney(ele.money),
               to: type === "year" ? "" : { pathname: ele.to, search: searchs }
             }))}
             columns={[
@@ -538,14 +395,18 @@ class Cockpit extends Component {
                 ),
                 id: 0
               },
-              {
-                render: ele => <Rate value={ele.rate} />,
-                id: 1
-              },
+              ...(type === "day"
+                ? []
+                : [
+                    {
+                      render: ele => <Rate value={ele.rate} />,
+                      id: 1
+                    }
+                  ]),
               {
                 render: ele => (
                   <IncomeRight>
-                    <span>{ele.money && `￥${ele.money}`}</span>
+                    <span>{ele.money}</span>
                     {ele.to && <RightArrow />}
                   </IncomeRight>
                 ),
@@ -554,8 +415,7 @@ class Cockpit extends Component {
             ]}
           />
         </BlockArea>
-        <LinePointer>当天凌晨4点更新昨天数据</LinePointer>
-      </div>
+      </>
     );
   }
 }

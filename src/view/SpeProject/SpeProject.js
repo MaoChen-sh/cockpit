@@ -89,7 +89,7 @@ class SpeProject extends PureComponent {
       <>
         <Wrap>
           {list.map((ele, index) => (
-            <Item key={index} to={"/speproject/" + ele + "/month"}>
+            <Item key={index} to={"/speproject/" + ele + "/day"}>
               {Svgs[ele]}
               <Title>{TEXT[ele]}</Title>
               <Description>{DESCRIPTION_TEXT[ele]}</Description>

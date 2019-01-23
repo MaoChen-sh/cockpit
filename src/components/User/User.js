@@ -38,6 +38,10 @@ class User extends PureComponent {
   }
 }
 
-User.propTypes = {};
+User.propTypes = {
+  isMale: PropTypes.bool,
+  name: PropTypes.node,
+  depart: PropTypes.node
+};
 
 export default User;

@@ -73,6 +73,11 @@ class Prescription extends DateSelectPageTemplate {
       </>
     );
   }
+  TabList = [
+    { content: "日报", id: "day", to: "/speproject/prescription/day" },
+    { content: "月报", id: "month", to: "/speproject/prescription/month" },
+    { content: "年报", id: "year", to: "/speproject/prescription/year" }
+  ];
 }
 
 export default Prescription;

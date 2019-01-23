@@ -25,9 +25,20 @@ const Count = styled.span`
 `;
 class BlockArea extends PureComponent {
   render() {
-    const { defaultStyles, className, title, children, count } = this.props;
+    const {
+      defaultStyles,
+      className,
+      title,
+      children,
+      count,
+      onClick
+    } = this.props;
     return (
-      <Box defaultStyles={defaultStyles} className={className}>
+      <Box
+        defaultStyles={defaultStyles}
+        className={className}
+        onClick={onClick}
+      >
         {title && (
           <NavTitle
             className={"block-area-title"}
@@ -47,7 +58,8 @@ class BlockArea extends PureComponent {
 BlockArea.propTypes = {
   className: PropTypes.string,
   defaultStyles: PropTypes.string,
-  title: PropTypes.node
+  title: PropTypes.node,
+  onClick: PropTypes.func
 };
 
 export default BlockArea;

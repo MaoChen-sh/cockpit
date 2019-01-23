@@ -2,6 +2,7 @@ import React, { PureComponent } from "react";
 import { Chart, BlockArea, RightArrow, Rate } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
+import { Link } from "react-router-dom";
 import { TableTemp as Table, HeaderTemp } from "view/components";
 import fakeData from "config/fakeData";
 const NavList = styled.ul`
@@ -10,7 +11,7 @@ const NavList = styled.ul`
   & > li {
     width: 33%;
     text-align: center;
-    & > * {
+    & > a > * {
       padding-top: 5px;
       padding-bottom: 5px;
       &:first-child {
@@ -79,9 +80,7 @@ class Surgery extends PureComponent {
     total: 0, // 总手数台数
     diffLevelSurgery: {}, // 不同级别手术信息
     diffTypeSurgery: {}, // 不同类别手术信息
-    dataType: "area",
-    countListSort: "down", // 列表按数据排序分布
-    rateListSort: "none" // 列表按环比排序分布
+    dataType: "area"
   };
   get type() {
     const {
@@ -108,17 +107,26 @@ class Surgery extends PureComponent {
       {
         title: "门诊手术",
         ...diffTypeSurgery.outpatient,
-        to: "/cockpit/outpatient"
+        to: {
+          pathname: "/cockpit/surgery/typedetail",
+          state: { title: "门诊手术" }
+        }
       },
       {
         title: "择期手术",
         ...diffTypeSurgery.elective,
-        to: "/cockpit/surgery"
+        to: {
+          pathname: "/cockpit/surgery/typedetail",
+          state: { title: "择期手术" }
+        }
       },
       {
         title: "急诊手术",
         ...diffTypeSurgery.emergency,
-        to: ""
+        to: {
+          pathname: "/cockpit/surgery/typedetail",
+          state: { title: "急诊手术" }
+        }
       }
     ];
   }
@@ -133,7 +141,6 @@ class Surgery extends PureComponent {
   }
 
   get columns() {
-    const { countListSort, rateListSort } = this.state;
     if (this.type === "day") {
       return [
         {
@@ -145,8 +152,7 @@ class Surgery extends PureComponent {
         },
         {
           title: "手术例数",
-          sort: countListSort,
-          onSort: this.onCountListSort,
+          sortKey: "value",
           render: ele => ele.value,
           id: 1
         }
@@ -162,38 +168,30 @@ class Surgery extends PureComponent {
       },
       {
         title: "环比数据",
-        sort: rateListSort,
-        onSort: this.onRateListSort,
+        sortKey: "rate",
         render: ele => <Rate value={ele.rate} />,
         id: 1
       },
       {
         title: "手术例数",
-        sort: countListSort,
-        onSort: this.onCountListSort,
+        sortKey: "value",
         render: ele => ele.value,
         id: 2
       }
     ];
   }
   get listData() {
-    const { dataType, countListSort, rateListSort } = this.state;
+    const { dataType } = this.state;
     const dataArr = fakeData[dataType].map((ele, index) => ({
       ...ele,
       rate: Math.random(),
-      to: "/",
+      to: {
+        pathname: "/cockpit/surgery/detail",
+        state: { title: ele.name }
+      },
       id: index
     }));
-    if (countListSort !== "none") {
-      return dataArr.sort(
-        (a, b) => (countListSort === "down" ? -1 : 1) * (a.value - b.value)
-      );
-    }
-    if (rateListSort !== "none") {
-      return dataArr.sort(
-        (a, b) => (rateListSort === "down" ? -1 : 1) * (a.rate - b.rate)
-      );
-    }
+
     return dataArr;
   }
 
@@ -272,25 +270,20 @@ class Surgery extends PureComponent {
       ]
     };
   };
-  onCountListSort = () => {
-    this.setState({
-      countListSort: this.state.countListSort === "down" ? "up" : "down",
-      rateListSort: "none"
-    });
-  };
-  onRateListSort = () => {
-    this.setState({
-      countListSort: "none",
-      rateListSort: this.state.rateListSort === "down" ? "up" : "down"
-    });
-  };
+
   onOptionChange = val => {
     this.setState({
       dataType: val === "科室" ? "class" : "area"
     });
   };
+  gotoLevelDetail = e => {
+    if (e.target.tagName.toUpperCase() === "CANVAS") {
+      return;
+    }
+    this.props.history.push("/cockpit/surgery/leveldetail");
+  };
   render() {
-    const { total } = this.state;
+    const { total, dataType } = this.state;
     return (
       <div>
         <HeaderTemp small title={"手术台数"} count={total} />
@@ -298,17 +291,19 @@ class Surgery extends PureComponent {
           <NavList>
             {this.navListData.map((ele, index) => (
               <li key={index}>
-                <h4>{ele.title}</h4>
-                {this.type !== "day" && <Rate value={ele.rate} />}
-                <p>
-                  <span>{ele.value}</span>
-                  <RightArrow />
-                </p>
+                <Link to={ele.to}>
+                  <h4>{ele.title}</h4>
+                  {this.type !== "day" && <Rate value={ele.rate} />}
+                  <p>
+                    <span>{ele.value}</span>
+                    <RightArrow />
+                  </p>
+                </Link>
               </li>
             ))}
           </NavList>
         </BlockArea>
-        <BlockArea title={"不同级别手术台数"}>
+        <BlockArea title={"不同级别手术台数"} onClick={this.gotoLevelDetail}>
           <Chart
             defaultStyles={`height: 120px;`}
             getOptions={this.getOptions}
@@ -323,7 +318,9 @@ class Surgery extends PureComponent {
             ))}
           </Legend>
         </BlockArea>
-        <BlockArea title={"不同科室手术例数"}>
+        <BlockArea
+          title={"不同" + (dataType === "class" ? "科室" : "病区") + "手术例数"}
+        >
           <Table data={this.listData} columns={this.columns} />
         </BlockArea>
       </div>

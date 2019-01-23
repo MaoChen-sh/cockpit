@@ -117,6 +117,9 @@ const CalendarMain = styled(CalendarBase)`
     }
     &[disabled] {
       color: #ddd;
+      & > time {
+        color: #ddd;
+      }
     }
   }
 `;
@@ -194,7 +197,7 @@ class Calendar extends PureComponent {
           onChange={this.onClickDay}
           maxDate={maxDate}
           formatMonth={date => getMonthNode(date.getMonth())}
-          selectRange = {selectRange}
+          selectRange={selectRange}
         />
       </Wrap>
     );
@@ -228,10 +231,9 @@ class Calendar extends PureComponent {
 Calendar.propTypes = {
   onCancel: PropTypes.func,
   onConfirm: PropTypes.func,
-  value: PropTypes.oneOfType([PropTypes.object,PropTypes.array]),
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   onChange: PropTypes.func,
-  selectRange: PropTypes.bool,
-
+  selectRange: PropTypes.bool
 };
 
 export default ControllSwitchHoc({})(Calendar);

@@ -1,2 +1,3 @@
 import DateSelectPageTemplate from "./DateSelectPageTemplate";
-export { DateSelectPageTemplate };
+import TablePageTemplate from "./TablePageTemplate";
+export { DateSelectPageTemplate , TablePageTemplate};

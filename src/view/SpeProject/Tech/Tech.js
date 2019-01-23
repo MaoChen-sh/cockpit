@@ -36,85 +36,105 @@ const NavList = styled(ListBase)`
 `;
 class Tech extends DateSelectPageTemplate {
   get techList() {
+    console.log(this.type);
     const List = [
       {
         svg: Ultrasound,
         title: "超声",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/ultrasound"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "ultrasound" }
+        }
       },
       {
         svg: CT,
         title: "CT检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/ct"
+        to: { pathname: "/speproject/techproject", state: { project: "ct" } }
       },
       {
         svg: DR,
         title: "DR检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/dr"
+        to: { pathname: "/speproject/techproject", state: { project: "dr" } }
       },
       {
         svg: Hemodialysis,
         title: "血透",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/hemodialysis"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "hemodialysis" }
+        }
       },
       {
         svg: MR,
         title: "MR检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/mr"
+        to: { pathname: "/speproject/techproject", state: { project: "mr" } }
       },
       {
         svg: Endoscopy,
         title: "内镜检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/endoscopy"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "endoscopy" }
+        }
       },
       {
         svg: Peritoneal,
         title: "腹透",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/peritoneal"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "peritoneal" }
+        }
       },
       {
         svg: DigitalGastrointestinal,
         title: "数字肠胃检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/digitalgastrointestinal"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "digitalgastrointestinal" }
+        }
       },
       {
         svg: Breast,
         title: "乳腺检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/breast"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "breast" }
+        }
       },
       {
         svg: Electrocardiogram,
         title: "心电图",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/electrocardiogram"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "electrocardiogram" }
+        }
       },
       {
         svg: Interventional,
         title: "介入治疗检查",
         count: 352,
-        rate: null,
-        to: "/speproject/techproject/interventional"
+        to: {
+          pathname: "/speproject/techproject",
+          state: { project: "interventional" }
+        }
       }
     ];
+    if (this.type !== "day") {
+      return List.map(ele => ({
+        ...ele,
+        rate: Math.random() - 0.5
+      }));
+    }
     return List;
   }
   get content() {
