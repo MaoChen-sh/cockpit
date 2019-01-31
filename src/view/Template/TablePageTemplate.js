@@ -6,7 +6,7 @@ class TablePageTemplate extends PureComponent {
   render() {
     return (
       <>
-        <Header small {...this.headerProps} />
+        {!this.noHeader && <Header small {...this.headerProps} />}
         <BlockArea title={this.title}>
           <Table noArrow data={this.tableData} columns={this.tableColumns} />
         </BlockArea>

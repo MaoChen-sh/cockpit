@@ -36,7 +36,6 @@ const NavList = styled(ListBase)`
 `;
 class Tech extends DateSelectPageTemplate {
   get techList() {
-    console.log(this.type);
     const List = [
       {
         svg: Ultrasound,

@@ -57,6 +57,14 @@ class Income extends PureComponent {
   };
   get type() {
     const {
+      match: {
+        params: { type }
+      }
+    } = this.props;
+    return type;
+  }
+  get dateType() {
+    const {
       location: { search }
     } = this.props;
     return search.match(/type=(\w+)/)[1];
@@ -74,13 +82,8 @@ class Income extends PureComponent {
     return search.match(/endDate=([\d-]+)/)[1];
   }
   get columns() {
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
-    const str = this.strObj[type];
-    if (this.type === "day") {
+    const str = this.strObj[this.type];
+    if (this.dateType === "day") {
       return [
         {
           title: "科室",
@@ -119,16 +122,12 @@ class Income extends PureComponent {
   }
   get listData() {
     const dataArr = fakeData;
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
+
     return dataArr.map((ele, index) => ({
       ...ele,
       value: ele.value,
       to: {
-        pathname: "/cockpit/income/" + type + "/detail",
+        pathname: "/cockpit/income/" + this.type + "/detail",
         state: {
           name: ele.name
         }
@@ -184,7 +183,7 @@ class Income extends PureComponent {
           }
         },
         axisLabel: {
-          interval: this.type === "day" ? 0 : data.length - 2,
+          interval: this.dateType === "day" ? 0 : data.length - 2,
           margin: 4,
           color: "#666",
           fontSize: 10
@@ -215,8 +214,8 @@ class Income extends PureComponent {
         {
           data: data,
           type: "line",
-          showSymbol: this.type === "day",
-          symbol: this.type === "day" ? "circle" : "emptyCircle",
+          showSymbol: this.dateType === "day",
+          symbol: this.dateType === "day" ? "circle" : "emptyCircle",
           symbolSize: 6,
           label: {
             show: true,
@@ -256,19 +255,26 @@ class Income extends PureComponent {
       ]
     };
   };
+  typeDetailLink = (() => {
+    const { type } = this;
+    if (type === "total") {
+      return "/cockpit/income/total/single";
+    } else if (type === "drug") {
+      return "/cockpit/income/drug/single";
+    } else {
+      return `/cockpit/income/${type}/typedetail`;
+    }
+  })();
 
   render() {
-    const {
-      match: {
-        params: { type }
-      }
-    } = this.props;
+    const { type } = this;
     const str = this.strObj[type];
     return (
       <div>
         <HeaderTemp small title={str} count={getMoney(1800800)} />
-        {this.type !== "day" && (
+        {this.dateType !== "day" && (
           <BlockArea
+            to={this.typeDetailLink}
             title={`本月每天的${str}`}
             defaultStyles={`height: 150px;padding: 14px 0`}
           >

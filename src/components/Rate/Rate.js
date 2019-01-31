@@ -78,7 +78,7 @@ class Rate extends PureComponent {
 Rate.propTypes = {
   className: PropTypes.string,
   defaultStyles: PropTypes.string,
-  value: PropTypes.number
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 };
 
 export default Rate;

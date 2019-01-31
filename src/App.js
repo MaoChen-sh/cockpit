@@ -53,7 +53,7 @@ const staticNavList = [
     content: "护理",
     id: "nursing",
     url: "/nursing"
-  },
+  }
   // {
   //   svg: mine,
   //   content: "我的",
@@ -94,12 +94,24 @@ class App extends Component {
     return (
       <Wrap className="App">
         <Routers />
-        <Nav navList={staticNavList} activeId={pathArr && pathArr[0]} />
+        {isFirstRankPage(location.pathname) && (
+          <Nav navList={staticNavList} activeId={pathArr[0]} />
+        )}
       </Wrap>
     );
   }
 }
 
+function isFirstRankPage(pathname) {
+  const arr = [
+    /^\/cockpit\/home\/\w+$/,
+    /^\/speproject$/,
+    /^\/nursing$/,
+    /^\/statistics$/,
+    /^\/mine$/
+  ];
+  return arr.some(ele => ele.test(pathname));
+}
 function wxSign() {
   return $fetch.get(apis.wechat.config, null, true);
 }

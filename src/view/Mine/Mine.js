@@ -139,7 +139,6 @@ class Mine extends PureComponent {
     ];
   }
   render() {
-    console.log(this.setState.showOutPatientSpending);
     return (
       <>
         <UserWrap>

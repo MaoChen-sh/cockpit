@@ -22,6 +22,7 @@ const CalendarView = styled.div`
   z-index: 4;
   display: inline-block;
   font-size: 14px;
+  white-space: nowrap;
 `;
 const CalendarIcon = styled(CalendarIconBase)`
   width: 16px;
@@ -193,6 +194,17 @@ class DateSelectPageTemplate extends PureComponent {
       companySelectorView: false
     });
   };
+  componentWillUpdate(nextProps, nextState) {
+    const { calenderView, companySelectorView } = nextState;
+    if (calenderView || companySelectorView) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+      document.documentElement.style.overflow = "auto";
+    }
+  }
+
   render() {
     const {
       onDateChange,
@@ -210,6 +222,7 @@ class DateSelectPageTemplate extends PureComponent {
       companySelectorView,
       currentCompany
     } = this.state;
+
     return (
       <>
         {calenderView && (
@@ -225,14 +238,17 @@ class DateSelectPageTemplate extends PureComponent {
           <CompanySelectorModal
             onChange={onCompanyChange}
             onCancel={hideCompanySelector}
-            defaultValue={companyList[0].id}
+            defaultValue={String(companyList[0].id)}
             list={companyList}
             title={"选择院区"}
           />
         )}
-        <Header>
-          <Tab activeId={type} list={TabList} />
-          <CalendarView onClick={showCalendar}>
+        <Header defaultStyles={!TabList ? `margin-top: -66px;` : ""}>
+          {TabList && <Tab activeId={type} list={TabList} />}
+          <CalendarView
+            onClick={showCalendar}
+            style={!TabList ? { top: "90px" } : {}}
+          >
             {this.getDateStr(currentDate)} <CalendarIcon />
             <CompanySelector onClick={showCompanySelector}>
               {companyList[currentCompany || 0].content}

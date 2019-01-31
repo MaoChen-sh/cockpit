@@ -9,7 +9,6 @@ class DataDisplay extends PureComponent {
     const valueArr = this.context.dateData.map(ele =>
       parseInt(Math.random() * 1000)
     );
-    console.log(this.context.projectData);
     return [
       {
         name: this.context.projectData[0] && this.context.projectData[0].name,
@@ -40,7 +39,6 @@ class DataDisplay extends PureComponent {
   })();
   render() {
     const dateArr = this.context.dateData;
-    console.log(this.scrollTableColumns);
     return (
       <div>
         <BlockArea title={"总对比结果"}>

@@ -165,7 +165,6 @@ class BodyCheck extends PureComponent {
       value: ele.count,
       name: ele.title
     }));
-    console.log(this.dataList, this.type);
     return (
       <div>
         <HeaderTemp small title={"体检人数"} count={total} />
@@ -185,23 +184,24 @@ class BodyCheck extends PureComponent {
             ))}
           </NavList>
         </BlockArea>
-        <Link to={"/cockpit/bodycheck/ratedetail"}>
-          <BlockArea title={"不同类型体检人数占比"}>
-            <Chart
-              defaultStyles={`height: 120px;`}
-              data={canvasData}
-              getOptions={this.getOptions}
-            />
-            <Legend>
-              {canvasData.map((ele, index) => (
-                <LegendItem key={index} color={colors[index]}>
-                  <span>{ele.name}</span>
-                  <span>{ele.value}</span>
-                </LegendItem>
-              ))}
-            </Legend>
-          </BlockArea>
-        </Link>
+        <BlockArea
+          title={"不同类型体检人数占比"}
+          to={"/cockpit/bodycheck/ratedetail"}
+        >
+          <Chart
+            defaultStyles={`height: 120px;`}
+            data={canvasData}
+            getOptions={this.getOptions}
+          />
+          <Legend>
+            {canvasData.map((ele, index) => (
+              <LegendItem key={index} color={colors[index]}>
+                <span>{ele.name}</span>
+                <span>{ele.value}</span>
+              </LegendItem>
+            ))}
+          </Legend>
+        </BlockArea>
       </div>
     );
   }

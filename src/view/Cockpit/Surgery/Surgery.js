@@ -2,6 +2,8 @@ import React, { PureComponent } from "react";
 import { Chart, BlockArea, RightArrow, Rate } from "components";
 import styled from "styled-components";
 import { $fetch, apis } from "config";
+import { random, getYMD } from "tools";
+import echarts from "echarts/lib/echarts";
 import { Link } from "react-router-dom";
 import { TableTemp as Table, HeaderTemp } from "view/components";
 import fakeData from "config/fakeData";
@@ -74,7 +76,7 @@ const LegendItem = styled.li`
   }
 `;
 const colors = ["#32d9c1", "#ffc75b", "#f88287", "#24b1f3"];
-
+const oneDay = 24 * 3600 * 1000;
 class Surgery extends PureComponent {
   state = {
     total: 0, // 总手数台数
@@ -276,17 +278,141 @@ class Surgery extends PureComponent {
       dataType: val === "科室" ? "class" : "area"
     });
   };
-  gotoLevelDetail = e => {
-    if (e.target.tagName.toUpperCase() === "CANVAS") {
-      return;
-    }
-    this.props.history.push("/cockpit/surgery/leveldetail");
+
+  get timeChartData() {
+    // const { outpatientData } = this.state;
+    return Array(31)
+      .fill(0)
+      .map(() => random(0, 120));
+  }
+  getTimeChartOptions = data => {
+    return {
+      tooltip: {
+        trigger: "axis",
+        axisPointer: {
+          lineStyle: {
+            type: "dotted",
+            color: "#F2B241"
+          }
+        },
+        backgroundColor: "#FF931E",
+        formatter: "{c0}<br /><span style='font-size: 9px'>{b0}</span>",
+        textStyle: {
+          fontSize: 10
+        }
+      },
+      grid: {
+        left: "30px",
+        right: "20px",
+        top: "20px",
+        bottom: "16px"
+      },
+      xAxis: {
+        type: "category",
+        axisTick: {
+          show: false
+        },
+        data: data.map((ele, index) =>
+          getYMD(new Date(new Date(this.beginDate).valueOf() + oneDay * index))
+            .map(ele => (ele < 10 ? "0" + ele : ele))
+            .join(".")
+        ),
+        min: 0,
+        axisLine: {
+          lineStyle: {
+            color: " #ddd"
+          }
+        },
+        axisLabel: {
+          interval: data.length - 2,
+          margin: 4,
+          color: "#666",
+          fontSize: 10
+        }
+      },
+      yAxis: {
+        splitNumber: 3,
+        type: "value",
+        axisLine: {
+          lineStyle: {
+            color: " #ddd"
+          }
+        },
+        axisTick: {
+          show: false
+        },
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          margin: 4,
+          color: "#666",
+          fontSize: 10
+        }
+      },
+      series: [
+        {
+          data: data,
+          type: "line",
+          showSymbol: false,
+          symbol: "emptyCircle",
+          symbolSize: 6,
+          label: {
+            show: true,
+            distance: 4,
+            color: "#ff9405",
+            fontSize: 9
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: "rgba(255,203,84,0.5)"
+              },
+              {
+                offset: 1,
+                color: "rgba(255,243,222,1)"
+              }
+            ])
+          },
+          lineStyle: {
+            color: "#F2B241",
+            width: 1
+          },
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              {
+                offset: 0,
+                color: "rgba(255,141,22,1)"
+              },
+              {
+                offset: 1,
+                color: "rgba(255,170,55,1)"
+              }
+            ])
+          }
+        }
+      ]
+    };
   };
   render() {
     const { total, dataType } = this.state;
     return (
       <div>
         <HeaderTemp small title={"手术台数"} count={total} />
+        {this.type !== "day" && (
+          <BlockArea
+            to={"/cockpit/surgery/timedetail" + this.props.location.search}
+            title={"本月每日手术台数"}
+            defaultStyles={`padding: 14px 0`}
+          >
+            <Chart
+              getOptions={this.getTimeChartOptions}
+              data={this.timeChartData}
+            />
+          </BlockArea>
+        )}
+
         <BlockArea title={"不同类别的手术台数"}>
           <NavList>
             {this.navListData.map((ele, index) => (
@@ -303,7 +429,8 @@ class Surgery extends PureComponent {
             ))}
           </NavList>
         </BlockArea>
-        <BlockArea title={"不同级别手术台数"} onClick={this.gotoLevelDetail}>
+
+        <BlockArea title={"不同级别手术台数"} to={"/cockpit/surgery/leveldetail"}>
           <Chart
             defaultStyles={`height: 120px;`}
             getOptions={this.getOptions}

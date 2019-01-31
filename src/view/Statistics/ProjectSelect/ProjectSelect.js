@@ -219,7 +219,6 @@ class ProjectSelect extends PureComponent {
 
   render() {
     const { getTableList } = this;
-    console.log(this);
     return (
       <div>
         <LinePointer>{this.maxSelectAble - 1 === 0 ? "最多选择一个统计项" : "最多在同一模块下选择三个项目"}</LinePointer>

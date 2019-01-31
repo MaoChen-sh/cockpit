@@ -114,7 +114,6 @@ class Drug extends DateSelectPageTemplate {
     ];
   }
   get content() {
-    console.log(this.type);
     if (this.type !== "day") {
       return (
         <LinkList

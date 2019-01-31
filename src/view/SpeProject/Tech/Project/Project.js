@@ -26,6 +26,10 @@ const projectNameObj = {
   interventional: "介入治疗检查"
 };
 class Project extends PureComponent {
+  constructor(props) {
+    super(props);
+    document.title = projectNameObj[props.location.state.project];
+  }
   columns = [
     {
       title: "患者",
@@ -46,12 +50,11 @@ class Project extends PureComponent {
   get listData() {
     const dataArr = fakeData.map((ele, index) => ({
       ...ele,
-      to: "/",
       id: index
     }));
     return dataArr;
   }
- 
+
   render() {
     const project = projectNameObj[this.props.location.state.project];
     return (
@@ -70,7 +73,7 @@ class Project extends PureComponent {
           ]}
         />
         <BlockArea title={"不同患者的检查/等待时间"}>
-          <Table data={this.listData} columns={this.columns} />
+          <Table noArrow data={this.listData} columns={this.columns} />
         </BlockArea>
       </div>
     );

@@ -113,7 +113,61 @@ class TableTemp extends PureComponent {
     }
   };
   get columns() {
-    const { columns, noArrow } = this.props;
+    let { columns, noArrow } = this.props;
+    columns = columns.map((ele, index) => {
+      const { title, sortKey, options, id } = ele;
+      let newTitle = <div>{title}</div>;
+      if (sortKey) {
+        newTitle = (
+          <div key={index}>
+            <div
+              className={`list_title--sort ${
+                id === this.state.sortId
+                  ? this.state.sortUp
+                    ? "up"
+                    : "down"
+                  : ""
+              }`}
+              onClick={this.sort(id, sortKey)}
+            >
+              {title}
+            </div>
+          </div>
+        );
+      }
+
+      if (options) {
+        const newOptions = options.map(ele => ({
+          label: ele,
+          value: ele
+        }));
+        newTitle = (
+          <Select
+            defaultStyles={`
+            &>div{
+              display: inline-block
+            }
+            &::after{
+              display: inline-block;
+              margin-left: 6px;
+              vertical-align: middle;
+              position:static;
+              width:0;
+            }
+          `}
+            key={index}
+            inputRender={selectRender}
+            defaultValue={newOptions[0].value}
+            onChange={ele.onChange}
+            options={newOptions}
+          />
+        );
+      }
+      return {
+        ...ele,
+        title: newTitle
+      };
+    });
     return noArrow
       ? columns
       : [
@@ -124,60 +178,7 @@ class TableTemp extends PureComponent {
             ),
             id: columns.length
           }
-        ].map((ele, index) => {
-          const { title, sortKey, options, id } = ele;
-          let newTitle = <div>{title}</div>;
-          if (sortKey) {
-            newTitle = (
-              <div key={index}>
-                <div
-                  className={`list_title--sort ${
-                    id === this.state.sortId
-                      ? this.state.sortUp
-                        ? "up"
-                        : "down"
-                      : ""
-                  }`}
-                  onClick={this.sort(id, sortKey)}
-                >
-                  {title}
-                </div>
-              </div>
-            );
-          }
-
-          if (options) {
-            const newOptions = options.map(ele => ({
-              label: ele,
-              value: ele
-            }));
-            newTitle = (
-              <Select
-                defaultStyles={`
-                &>div{
-                  display: inline-block
-                }
-                &::after{
-                  display: inline-block;
-                  margin-left: 6px;
-                  vertical-align: middle;
-                  position:static;
-                  width:0;
-                }
-              `}
-                key={index}
-                inputRender={selectRender}
-                defaultValue={newOptions[0].value}
-                onChange={ele.onChange}
-                options={newOptions}
-              />
-            );
-          }
-          return {
-            ...ele,
-            title: newTitle
-          };
-        });
+        ];
   }
   rowClick = (ele, rowIndex) => {
     const { to, onClick } = ele;

@@ -6,6 +6,7 @@ import "zrender/lib/svg/svg";
 require("echarts/lib/component/dataset");
 require("echarts/lib/chart/line");
 require("echarts/lib/chart/pie");
+require("echarts/lib/chart/bar");
 require("echarts/lib/chart/effectScatter");
 require("echarts/lib/component/tooltip");
 require("echarts/lib/component/title");
@@ -79,7 +80,7 @@ Chart.propTypes = {
   className: PropTypes.string,
   defaultStyles: PropTypes.string,
   getOptions: PropTypes.func,
-  data: PropTypes.array
+  data: PropTypes.any
 };
 
 export default Chart;

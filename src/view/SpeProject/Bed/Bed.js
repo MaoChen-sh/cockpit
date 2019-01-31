@@ -6,8 +6,6 @@ import { DateSelectPageTemplate } from "view/Template";
 import fakeData from "config/fakeData";
 import { ReactComponent as Approved } from "static/svg/approved.svg";
 import { ReactComponent as Occupied } from "static/svg/occupied.svg";
-const a = styled.div``;
-console.log(a);
 const NavList = styled(ListBase)`
   & > li {
     display: flex;
@@ -67,7 +65,7 @@ class Bed extends DateSelectPageTemplate {
     const dataArr = fakeData["area"].map((ele, index) => ({
       ...ele,
       value2: Math.random(),
-      to: "/speproject/beddetail?area=" + ele.name,
+      to: { pathname: "/speproject/beddetail", state: { title: ele.name } },
       id: index
     }));
     return dataArr;

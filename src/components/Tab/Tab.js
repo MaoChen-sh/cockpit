@@ -41,7 +41,7 @@ class Tab extends PureComponent {
               active={isActive}
               className={isActive ? "active" : ""}
             >
-              <Link to={ele.to}>{ele.content}</Link>
+              <Link to={ele.to} replace>{ele.content}</Link>
             </Item>
           );
         })}

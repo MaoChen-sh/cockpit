@@ -5,6 +5,10 @@ import { ReactComponent as Real } from "static/svg/real.svg";
 import { ReactComponent as Add } from "static/svg/add.svg";
 import { ReactComponent as Borrow } from "static/svg/borrow.svg";
 class Detail extends PureComponent {
+  constructor(props){
+    super(props)
+    document.title=props.location.state.title
+  }
   get list() {
     return [
       {

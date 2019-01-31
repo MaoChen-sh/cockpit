@@ -194,7 +194,7 @@ class Reserve extends DateSelectPageTemplate {
               <span>{this.normalData[0].name}</span>
             </LegendItem>
             <LegendItem color={colors[1]}>
-              <span>{this.normalData[0].name}</span>
+              <span>{this.proData[0].name}</span>
             </LegendItem>
           </Legend>
         </BlockArea>

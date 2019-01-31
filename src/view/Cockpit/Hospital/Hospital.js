@@ -291,7 +291,7 @@ class Hospital extends PureComponent {
         <HeaderTemp {...this.TYPE.getHeaderProps(this.state)} />
         {this.type !== "day" && (
           <BlockArea
-            {...this.TYPE.getChartAreaProps()}
+            {...this.TYPE.getChartAreaProps(this)}
             defaultStyles={`height: 150px;padding: 14px 0`}
           >
             <Chart getOptions={this.getOptions} data={this.chartData} />

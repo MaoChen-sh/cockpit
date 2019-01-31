@@ -1,6 +1,7 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import { Link as LinkBase } from "react-router-dom";
 const Box = styled.section`
   background: #ffffff;
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.1);
@@ -8,9 +9,19 @@ const Box = styled.section`
   width: 95%;
   margin: 10px auto 0;
   padding: 14px 5%;
+  position: relative;
+`;
+const Link = styled(LinkBase)`
+  position: absolute;
+  right: 20px;
+  top: 14px;
+  font-size: 12px;
+  color: #24a3e6;
+  line-height: 16px;
 `;
 const NavTitle = styled.h2`
   font-size: ${p => (p.hasCount ? "12px" : "14px")};
+  line-height: 16px;
   color: #666;
   font-weight: bold;
   text-align: center;
@@ -31,7 +42,8 @@ class BlockArea extends PureComponent {
       title,
       children,
       count,
-      onClick
+      onClick,
+      to
     } = this.props;
     return (
       <Box
@@ -39,6 +51,7 @@ class BlockArea extends PureComponent {
         className={className}
         onClick={onClick}
       >
+        {to && <Link to={to}>更多</Link>}
         {title && (
           <NavTitle
             className={"block-area-title"}
@@ -59,7 +72,8 @@ BlockArea.propTypes = {
   className: PropTypes.string,
   defaultStyles: PropTypes.string,
   title: PropTypes.node,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
+  to: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 };
 
 export default BlockArea;

@@ -18,7 +18,7 @@ class sufferer extends DateSelectPageTemplate {
         svg: OutpatientAverageSpending,
         value: getMoney(Math.round(Math.random() * 500)),
         to: {
-          pathname: "/speproject/suffererlist",
+          pathname: "/speproject/suffererdetail",
           state: { item: "outpatientaveragespending", type: this.type }
         }
       },
@@ -27,7 +27,7 @@ class sufferer extends DateSelectPageTemplate {
         svg: OutpatientAverageDrugSpending,
         value: getMoney(Math.round(Math.random() * 500)),
         to: {
-          pathname: "/speproject/suffererlist",
+          pathname: "/speproject/suffererdetail",
           state: { item: "outpatientaveragedrugspending", type: this.type }
         }
       },
@@ -36,7 +36,7 @@ class sufferer extends DateSelectPageTemplate {
         svg: AveragePrescriptionAmount,
         value: getMoney(Math.round(Math.random() * 500)),
         to: {
-          pathname: "/speproject/suffererlist",
+          pathname: "/speproject/suffererdetail",
           state: { item: "averageprescriptionamount", type: this.type }
         }
       },
@@ -45,7 +45,7 @@ class sufferer extends DateSelectPageTemplate {
         svg: HospitalizationAverageSpending,
         value: getMoney(Math.round(Math.random() * 20000)),
         to: {
-          pathname: "/speproject/suffererlist",
+          pathname: "/speproject/suffererdetail",
           state: { item: "hospitalizationaveragespending", type: this.type }
         }
       },
@@ -54,7 +54,7 @@ class sufferer extends DateSelectPageTemplate {
         svg: OutHospitalAverageDrugSpending,
         value: getMoney(Math.round(Math.random() * 10000)),
         to: {
-          pathname: "/speproject/suffererlist",
+          pathname: "/speproject/suffererdetail",
           state: { item: "outhospitalaveragedrugspending", type: this.type }
         }
       },
@@ -63,8 +63,8 @@ class sufferer extends DateSelectPageTemplate {
         svg: MedicalExaminationAverageSpending,
         value: getMoney(Math.round(Math.random() * 500)),
         to: {
-          pathname: "/speproject/suffererlist",
-          state: { item: "medicalexaminationaveragespending", type: this.type }
+          pathname: "/speproject/suffererbodycheckdetail",
+          state: { type: this.type }
         }
       }
     ];

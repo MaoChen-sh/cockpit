@@ -11,6 +11,7 @@ const Wrap = styled.div`
   ${p => p.defaultStyles}
 `;
 const Item = styled.div`
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -62,7 +63,7 @@ class LinkList extends PureComponent {
           const { to = "", svg: Svg, content, value, rate } = ele;
           return (
             <Item onClick={this.linkTo(to)} key={index}>
-              <Svg />
+              {Svg && <Svg />}
               <p>{content}</p>
               {rate && <Rate value={rate} />}
 

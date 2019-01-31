@@ -58,7 +58,13 @@ class Prescription extends DateSelectPageTemplate {
     const dataArr = fakeData["class"].map((ele, index) => ({
       ...ele,
       value2: parseInt(ele.value / (1 + Math.random() * 10)),
-      to: "/",
+      to: {
+        pathname: "/speproject/prescriptiondetail",
+        state: {
+          title: ele.name,
+          type: this.type
+        }
+      },
       id: index
     }));
     return dataArr;

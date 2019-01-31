@@ -60,11 +60,10 @@ class Detail extends PureComponent {
     rate: this.isDay ? undefined : Math.random() - 0.5
   }));
   render() {
-    console.log(this.columns);
     return (
       <>
         <BlockArea title={this.drugName + TEXT.analysis}>
-          <Table data={this.listData} columns={this.columns} />
+          <Table noArrow data={this.listData} columns={this.columns} />
         </BlockArea>
       </>
     );

@@ -64,7 +64,7 @@ class TypeDetail extends PureComponent {
           this.title
         }台数`}
       >
-        <Table columns={this.columns} data={this.tableData} />
+        <Table noArrow columns={this.columns} data={this.tableData} />
       </BlockArea>
     );
   }

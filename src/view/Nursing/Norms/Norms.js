@@ -1,30 +1,11 @@
-import React, { PureComponent } from "react";
+import React from "react";
 import styled from "styled-components";
-import { ArcDatePicker, TableTemp as Table } from "view/components";
+import { TableTemp as Table } from "view/components";
 import normsData from "./normsData";
-import { Header, Tab as TabBase, BlockArea, Calendar, Rate } from "components";
-import { getYMD } from "tools";
-import { ReactComponent as CalendarIconBase } from "static/svg/calendar.svg";
+import { Tab as TabBase, BlockArea, Rate } from "components";
+import { DateSelectPageTemplate } from "view/Template";
+import { random } from "tools";
 
-const CalendarView = styled.div`
-  position: absolute;
-  top: 90px;
-  left: 50%;
-  transform: translate(-50%);
-  color: #fff;
-  z-index: 4;
-  display: inline-block;
-  font-size: 14px;
-`;
-const CalendarIcon = styled(CalendarIconBase)`
-  width: 16px;
-  height: 16px;
-  margin-left: 8px;
-  vertical-align: text-bottom;
-  path {
-    fill: #fff;
-  }
-`;
 const Tab = styled(TabBase)`
   padding: 14px 3.2vw;
   li {
@@ -40,39 +21,16 @@ const Tab = styled(TabBase)`
     }
   }
 `;
-const now = new Date(new Date().toLocaleDateString());
-const endDate = (type => {
-  let [year, month, day] = getYMD(now);
-  month = month - 1;
-  if (month === 0) {
-    year = year - 1;
-    month = 12;
-  }
-  if (day < 2) {
-    month = month - 1;
-    if (month === 0) {
-      year = year - 1;
-      month = 12;
-    }
-  }
-  return new Date(`${year}/${month}/1`);
-})();
-class Norms extends PureComponent {
+
+class Norms extends DateSelectPageTemplate {
   constructor(props) {
     super(props);
-    this.get_listData();
-    console.log(endDate);
-    this.state = {
-      currentDate: endDate,
-      calenderView: false,
-      listData: []
-    };
+    const { norm } = props.match.params;
+    document.title = normsData[norm].title;
   }
 
-  get dateStr() {
-    const { currentDate: date } = this.state;
-    const [y, m] = getYMD(date);
-    return `${y}年${m}月`;
+  get type() {
+    return "month";
   }
   get childList() {
     const {
@@ -80,74 +38,40 @@ class Norms extends PureComponent {
     } = this.props.match;
     return normsData[norm].children;
   }
+  TabList = "";
 
-  get_listData = () => {
+  get listData() {
     const {
       params: { norm, childNorm }
     } = this.props.match;
     const { childList } = this;
-    setTimeout(() =>
-      this.setState({
-        listData: childList
-          ? childList[childNorm].testData.map((ele, index) => ({
-              ...ele,
-              id: index
-            }))
-          : normsData[norm].testData.map((ele, index) => ({
-              ...ele,
-              id: index
-            }))
+
+    return (childList ? childList[childNorm] : normsData[norm]).testData.map(
+      (ele, index) => ({
+        ...ele,
+        id: index,
+        to: {
+          pathname: `/nursing/normsdetail`,
+          state: {
+            norm: norm,
+            childNorm: childNorm,
+            item: ele.name
+          }
+        },
+        value: random(0, 100, 2),
+        rate: random(-1, 1, 4)
       })
     );
-  };
+  }
 
-  onDateChange = date => {
-    // this.get_data(date);
-    console.log(date);
-    this.setState({
-      currentDate: date,
-      calenderView: false
-    });
-  };
-  showCalendar = () => {
-    this.setState({
-      calenderView: true
-    });
-  };
-
-  hideCalendar = () => {
-    this.setState({
-      calenderView: false
-    });
-  };
-  render() {
-    const { onDateChange, childList } = this;
-    const { currentDate, calenderView, listData } = this.state;
+  get content() {
+    const { childList } = this;
+    const { listData } = this;
     const {
       params: { norm, childNorm }
     } = this.props.match;
     return (
       <div>
-        {calenderView && (
-          <Calendar
-            onChange={onDateChange}
-            onCancel={this.hideCalendar}
-            maxDate={endDate}
-            defaultValue={currentDate}
-            type="month"
-          />
-        )}
-        <Header defaultStyles={`margin-top: -66px;`}>
-          <CalendarView onClick={this.showCalendar}>
-            {this.dateStr}<CalendarIcon />
-          </CalendarView>
-          <ArcDatePicker
-            onChange={onDateChange}
-            date={currentDate}
-            endDate={endDate}
-            type="month"
-          />
-        </Header>
         {childList && (
           <Tab
             activeId={childNorm}
@@ -174,16 +98,18 @@ class Norms extends PureComponent {
             `}
             data={listData}
             columns={[
-              { title: "指标", render: ele => ele.name, id: 0 },
+              { title: "指标", render: ele => ele.name, id: "name" },
               {
                 title: "环比数据",
-                render: ele => <Rate value={Math.random()}> </Rate>,
-                id: 1
+                render: ele => <Rate value={+ele.rate}> </Rate>,
+                sortKey: "rate",
+                id: "rate"
               },
               {
                 title: "结果",
-                render: ele => (Math.random() / 10).toFixed(2) + "%",
-                id: 2
+                render: ele => ele.value + "%",
+                sortKey: "value",
+                id: "value"
               }
             ]}
           />

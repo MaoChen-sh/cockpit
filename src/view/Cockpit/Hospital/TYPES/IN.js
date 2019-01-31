@@ -1,7 +1,8 @@
 export default {
-  getChartAreaProps: () => {
+  getChartAreaProps: _this => {
     return {
-      title: "本月每日在院人数统计"
+      title: "本月每日在院人数统计",
+      to: "/cockpit/hospital/in/diseasedetail"
     };
   },
   getHeaderProps: state => {

@@ -288,12 +288,7 @@ class Outpatient extends PureComponent {
       ]
     };
   };
-  gotoTimeDetail = e => {
-    if (e.target.tagName.toUpperCase() === "CANVAS") {
-      return;
-    }
-    this.props.history.push("/cockpit/outpatient/timedetail");
-  };
+
   render() {
     const { total, outpatient, emergency } = this.state;
     return (
@@ -313,7 +308,7 @@ class Outpatient extends PureComponent {
           ]}
         />
         <BlockArea
-          onClick={this.gotoTimeDetail}
+          to={"/cockpit/outpatient/timedetail"}
           title={"不同时段门急诊人次"}
           defaultStyles={`padding: 14px 0`}
         >
