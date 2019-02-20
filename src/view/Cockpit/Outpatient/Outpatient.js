@@ -318,7 +318,7 @@ class Outpatient extends PureComponent {
           <BlockArea
             title={
               <AreaTitle>
-                不同科室门急诊人次 <RightArrow />
+                万州范围内外人数统计 <RightArrow />
               </AreaTitle>
             }
           >
