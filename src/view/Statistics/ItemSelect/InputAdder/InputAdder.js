@@ -99,7 +99,7 @@ class InputAdder extends PureComponent {
     onChange && onChange([...values]);
   };
 }
-InputAdder.proptypes = {
+InputAdder.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   values: PropTypes.array,
